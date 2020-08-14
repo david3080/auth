@@ -32,6 +32,7 @@ Flutter Webのサンプルサイトは[こちら](https://david3080.github.io/au
    - configをセットし、initializeAppする
    - main.dart.jsを読み込む
 
+
    ```
    <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-app.js"></script>
    <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-auth.js"></script>
