@@ -1,9 +1,9 @@
 # auth
 
 Flutter WebでFirebase AuthとFirestoreを利用してemailログインするサンプルプロジェクト
-(FirestorageはFlutter Webにまだ対応してないため、アバターの画像は実装してない)
+(FirestorageはFlutter Webにまだ対応してないため、アバターの画像は実装していません)
 
-[auth](https://david3080.github.io/auth/build/web){:target="_blank" rel="noopener"}
+Flutter Webのサンプルサイトは(こちら)[auth](https://david3080.github.io/auth/build/web)。
 
 ## 使い方
 
