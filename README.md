@@ -8,10 +8,11 @@ Flutter Webのサンプルサイトは[こちら](https://david3080.github.io/au
 ## 使い方
 
 1. Firebaseの初期設定
- - プロジェクト作成
- - コンソールでAuthenticationのメール/パスワード認証を有効化。
- - Webアプリを有効化。</>をクリックしてアプリ名をセットしてアプリを登録。
- - Firebase SDKの追加に表示される内容を3のindex.htmlの設定に利用。
+
+- プロジェクト作成
+- コンソールでAuthenticationのメール/パスワード認証を有効化。
+- Webアプリを有効化。</>をクリックしてアプリ名をセットしてアプリを登録。
+- Firebase SDKの追加に表示される内容を3のindex.htmlの設定に利用。
 
 2. Flutterでpubspec.yamlでパッケージ追加
 ```
@@ -23,7 +24,12 @@ Flutter Webのサンプルサイトは[こちら](https://david3080.github.io/au
 ```
 
 3. index.htmlにJSとFlutterアプリconfigを設定
-※ firebase関連のjsを読み込んでconfigセット・initializeAppしてmain.dart.jsを読み込む順番でないとエラーが発生
+
+下記の順番でないとエラーが発生します
+
+- Ffirebas関連のJSを読み込む
+- configをセットし、initializeAppする
+- main.dart.jsを読み込む
 
 ```
   <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-app.js"></script>
