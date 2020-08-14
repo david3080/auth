@@ -26,13 +26,13 @@ Flutter Webのサンプルサイトは[こちら](https://david3080.github.io/au
 
 3. index.htmlにJSとFlutterアプリconfigを設定
 
-下記の順番でないとエラーが発生します
+   下記の順番でないとエラーが発生します
 
-- Firebas関連のJSを読み込む
-- configをセットし、initializeAppする
-- main.dart.jsを読み込む
+   - Firebas関連のJSを読み込む
+   - configをセットし、initializeAppする
+   - main.dart.jsを読み込む
 
-```
+   ```
   <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-firestore.js"></script>
@@ -50,4 +50,4 @@ Flutter Webのサンプルサイトは[こちら](https://david3080.github.io/au
     firebase.initializeApp(firebaseConfig);
   </script>
   <script src="main.dart.js" type="application/javascript"></script>
-```
+  ```
