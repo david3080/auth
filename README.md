@@ -33,21 +33,21 @@ Flutter Webのサンプルサイトは[こちら](https://david3080.github.io/au
    - main.dart.jsを読み込む
 
    ```
-  <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-firestore.js"></script>
-  <script>
-    var firebaseConfig = {
-      apiKey: "AIzaSyC690bkpcy8xkMrR0MIa37tOpJUqPFuA0k",
-     authDomain: "firestore-5643d.firebaseapp.com",
-      databaseURL: "https://firestore-5643d.firebaseio.com",
-      projectId: "firestore-5643d",
-      storageBucket: "firestore-5643d.appspot.com",
-      messagingSenderId: "241654013175",
-      appId: "1:241654013175:web:a8331ea10e1f96ae3e07f2",
-      measurementId: "G-WHYCJHVGCV"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
-  <script src="main.dart.js" type="application/javascript"></script>
+   <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-app.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-auth.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-firestore.js"></script>
+   <script>
+     var firebaseConfig = {
+       apiKey: "...",
+       authDomain: "...",
+       databaseURL: "...",
+       projectId: "...",
+       storageBucket: "...",
+       messagingSenderId: "...",
+       appId: "...",
+       measurementId: "...",
+     };
+     firebase.initializeApp(firebaseConfig);
+    </script>
+    <script src="main.dart.js" type="application/javascript"></script>
   ```
