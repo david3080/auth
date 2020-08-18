@@ -28,10 +28,11 @@
       });
     }
   </script>
-  <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.18.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.18.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.18.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.18.0/firebase-storage.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.18.0/firebase-analytics.js"></script>
   <script>
     var firebaseConfig = {
       apiKey: "AIzaSyC690bkpcy8xkMrR0MIa37tOpJUqPFuA0k",
@@ -44,6 +45,7 @@
       measurementId: "G-WHYCJHVGCV"
     };
     firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
   </script>
   <script src="main.dart.js" type="application/javascript"></script>
 </body>
