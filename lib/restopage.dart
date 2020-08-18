@@ -380,14 +380,6 @@ class ReviewDetail extends StatelessWidget {
                             color: Colors.black,
                           )
                         ),
-                        SizedBox(width: 10.0),
-                        Text('(0 Reviews)', // TODO レビュー人数
-                          style: TextStyle(
-                            fontSize: 30.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.grey[900],
-                          )
-                        )
                       ],
                     ),
                   ),

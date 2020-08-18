@@ -62,7 +62,7 @@ class AccountPage extends StatelessWidget {
                             await userRef.document(uid).setData(_newUser.toMap());
                           },
                           decoration: InputDecoration(
-                            labelText: "ニックネーム",
+                            labelText: "名前",
                             labelStyle: TextStyle(color: Colors.white),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20.0),
