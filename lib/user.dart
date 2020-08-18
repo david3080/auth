@@ -8,7 +8,7 @@ final auth = FirebaseAuth.instance;
 final userRef = Firestore.instance.collection("users");
 
 class User {
-  User({@required this.uid, this.email, this.name, this.url});
+  User({@required this.uid, @required this.email, this.name, this.url});
   final String uid;
   final String email;
   final String name;
