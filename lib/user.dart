@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 final auth = FirebaseAuth.instance;
 final userRef = Firestore.instance.collection("users");
 
+// ユーザ情報のモデルとBlocを一緒にしたクラス
 class User {
   User({@required this.uid, @required this.email, this.name, this.url});
   final String uid;
@@ -52,8 +53,46 @@ class User {
     );
   }
 
-  static List users = jsonDecode(initUserString);
+  static Future<void> register(String email, String password) async {
+    AuthResult result = await auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    User user = User(uid: result.user.uid, email: result.user.email);
+    userRef.document(result.user.uid).setData(user.toMap());
+  }
 
+  static Future<void> login(String email, String password) async {
+    auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    ).then((result) {
+      if(result != null) {
+        userRef.document(result.user.uid).get().then((snapshot) {
+          // データベースにユーザ情報がなければ初期化
+          if(snapshot.data == null) {
+            User user = User(uid:result.user.uid,email:result.user.email);
+            User newUser = User.initUser(user); // initUserStringに定義されたユーザなら情報コピー
+            userRef.document(newUser.uid).setData(newUser.toMap());
+          }
+        });
+      }
+    });
+  }
+
+  static Future<void> logout() {
+    return auth.signOut();
+  }
+
+  Future<void> setUser({bool merge = false}) {
+    return userRef.document(uid).setData(this.toMap(),merge:merge);
+  }
+
+  static Stream<User> getUserStream(String uid) {
+    return userRef.document(uid).snapshots().map((snapshot)=>User.fromMap(uid,snapshot.data));
+  }
+
+  static List users = jsonDecode(initUserString);
   static User initUser(User user) {
     User newUser = user;
     users.forEach((_user) {

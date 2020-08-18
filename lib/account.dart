@@ -1,12 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
 import 'user.dart';
-
-final auth = FirebaseAuth.instance;
-final userRef = Firestore.instance.collection("users");
 
 class AccountPage extends StatelessWidget {
   AccountPage({this.uid,this.email});
@@ -26,13 +21,13 @@ class AccountPage extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.exit_to_app),
-            onPressed: () => auth.signOut(),
+            onPressed: () => User.logout(),
           ),
         ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(300),
           child: StreamBuilder<User>(
-            stream: userRef.document(uid).snapshots().map((snapshot)=>User.fromMap(uid,snapshot.data)),
+            stream: User.getUserStream(uid),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.active && snapshot.hasData) {
                 final user = snapshot.data;
@@ -59,7 +54,7 @@ class AccountPage extends StatelessWidget {
                             User _newUser = user.copy(
                               name: nameController.text,
                             );
-                            await userRef.document(uid).setData(_newUser.toMap());
+                            await _newUser.setUser();
                           },
                           decoration: InputDecoration(
                             labelText: "名前",

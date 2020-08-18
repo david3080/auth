@@ -1,13 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'alert.dart';
 import 'user.dart';
-
-final auth = FirebaseAuth.instance;
-final userRef = Firestore.instance.collection("users");
 
 enum LoginType { login, register }
 
@@ -110,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
                   },
                   padding: EdgeInsets.all(10),
                   shape: RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(10.0),
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
                 FlatButton(
@@ -132,21 +126,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final form = _formKey.currentState;
       if (form.validate()) {
-        auth.signInWithEmailAndPassword(
-          email: _email,
-          password: _password,
-        ).then((result) {
-          if(result != null) {
-            userRef.document(result.user.uid).get().then((snapshot) {
-              // データベースにユーザ情報がなければ初期化
-              if(snapshot.data == null) {
-                User user = User(uid:result.user.uid,email:result.user.email);
-                User newUser = User.initUser(user); // initUserStringに定義されたユーザなら情報コピー
-                userRef.document(newUser.uid).setData(newUser.toMap());
-              }
-            });
-          }
-        });
+        User.login(_email,_password);
       }
     } on PlatformException catch (e) {
       PlatformExceptionAlertDialog(
@@ -160,12 +140,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       final form = _formKey.currentState;
       if (form.validate()) {
-        AuthResult result = await auth.createUserWithEmailAndPassword(
-          email: _email,
-          password: _password,
-        );
-        User user = User(uid: result.user.uid, email: result.user.email);
-        userRef.document(result.user.uid).setData(user.toMap());
+        User.register(_email, _password);
       }
     } on PlatformException catch (e) {
       PlatformExceptionAlertDialog(
