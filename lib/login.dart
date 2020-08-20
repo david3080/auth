@@ -36,10 +36,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    var screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(50),
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Container(
+          height: screenHeight,
+          padding: EdgeInsets.all(20),
           child: Form(
             key: _formKey,
             child: Column(

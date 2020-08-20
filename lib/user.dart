@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 final auth = FirebaseAuth.instance;
-final userRef = Firestore.instance.collection("users");
+final userRef = FirebaseFirestore.instance.collection("users");
 
 // ユーザ情報のモデルとBlocを一緒にしたクラス
 class User {
@@ -54,12 +54,12 @@ class User {
   }
 
   static Future<void> register(String email, String password) async {
-    AuthResult result = await auth.createUserWithEmailAndPassword(
+    UserCredential cred = await auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
-    User user = User(uid: result.user.uid, email: result.user.email);
-    userRef.document(result.user.uid).setData(user.toMap());
+    User user = User(uid: cred.user.uid, email: cred.user.email);
+    userRef.doc(cred.user.uid).set(user.toMap());
   }
 
   static Future<void> login(String email, String password) async {
@@ -68,12 +68,12 @@ class User {
       password: password,
     ).then((result) {
       if(result != null) {
-        userRef.document(result.user.uid).get().then((snapshot) {
+        userRef.doc(result.user.uid).get().then((snapshot) {
           // データベースにユーザ情報がなければ初期化
           if(snapshot.data == null) {
             User user = User(uid:result.user.uid,email:result.user.email);
             User newUser = User.initUser(user); // initUserStringに定義されたユーザなら情報コピー
-            userRef.document(newUser.uid).setData(newUser.toMap());
+            userRef.doc(newUser.uid).set(newUser.toMap());
           }
         });
       }
@@ -85,11 +85,11 @@ class User {
   }
 
   Future<void> setUser({bool merge = false}) {
-    return userRef.document(uid).setData(this.toMap(),merge:merge);
+    return userRef.doc(uid).set(this.toMap(),SetOptions(merge:merge));
   }
 
   static Stream<User> getUserStream(String uid) {
-    return userRef.document(uid).snapshots().map((snapshot)=>User.fromMap(uid,snapshot.data));
+    return userRef.doc(uid).snapshots().map((snapshot)=>User.fromMap(uid,snapshot.data()));
   }
 
   static List users = jsonDecode(initUserString);

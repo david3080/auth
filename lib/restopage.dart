@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:responsive_grid/responsive_grid.dart';
@@ -9,8 +8,6 @@ import 'review.dart';
 
 const double _minSpacingPx = 16;
 const double _cardWidth = 360;
-
-final restoRef = Firestore.instance.collection("restos");
 
 class RestoPage extends StatelessWidget {
   @override

@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -35,11 +35,11 @@ class _LandingState extends State<Landing> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<FirebaseUser>(
-        stream: FirebaseAuth.instance.onAuthStateChanged,
+    return StreamBuilder<auth.User>(
+        stream: auth.FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.active) {
-            FirebaseUser user = snapshot.data;
+            auth.User user = snapshot.data;
             if (user == null) {
               return LoginPage();
             }

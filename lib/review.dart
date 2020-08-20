@@ -2,7 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-final restoRef = Firestore.instance.collection("restos");
+final restoRef = FirebaseFirestore.instance.collection("restos");
 
 class Review {
   Review({@required this.id,@required this.star,this.comment,@required this.uid,@required this.username,this.userphotourl,@required this.restoname});
@@ -66,13 +66,13 @@ class Review {
   }
 
   static Future<void> deleteReview(String restoId, String reviewId) {
-    return restoRef.document(restoId).collection("reviews").document(reviewId).delete();
+    return restoRef.doc(restoId).collection("reviews").doc(reviewId).delete();
   }
 
   static Stream<List<Review>> getReviwsStream(String restoId) {
-    return restoRef.document(restoId).collection("reviews").snapshots().map((snapshot) {
-      return snapshot.documents.map((snapshot) {
-        return Review.fromMap(snapshot.documentID,snapshot.data);
+    return restoRef.doc(restoId).collection("reviews").snapshots().map((snapshot) {
+      return snapshot.docs.map((snapshot) {
+        return Review.fromMap(snapshot.id,snapshot.data());
       }).toList();
     });
   }

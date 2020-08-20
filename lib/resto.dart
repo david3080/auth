@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'review.dart';
 
-final restoRef = Firestore.instance.collection("restos");
-final userRef = Firestore.instance.collection("users");
+final restoRef = FirebaseFirestore.instance.collection("restos");
+final userRef = FirebaseFirestore.instance.collection("users");
 
 class Resto {
   Resto({@required this.id, @required this.name, this.type, this.address, this.logo, this.star});
@@ -66,8 +66,8 @@ class Resto {
 
   static Stream<List<Resto>> getRestosStream() {
     return restoRef.snapshots().map((snapshot) {
-          return snapshot.documents.map((snapshot) {
-                    return Resto.fromMap(snapshot.documentID,snapshot.data);
+          return snapshot.docs.map((snapshot) {
+                    return Resto.fromMap(snapshot.id,snapshot.data());
                   }).toList();
         });
   }
@@ -75,18 +75,18 @@ class Resto {
   static List restos = jsonDecode(initRestoString);
   // レストランコレクションがなければ初期データをセット
   static void initRestos() {
-    restoRef.getDocuments().then((snapshot) {
-      if(snapshot.documents.length == 0) {
+    restoRef.get().then((snapshot) {
+      if(snapshot.docs.length == 0) {
         restos.forEach((_resto) {
-          var documentID = restoRef.document().documentID;
+          var documentID = restoRef.id;
           Resto resto = Resto(id:documentID,name:_resto["name"],type:_resto["type"],address:_resto["address"],logo:_resto["logo"],star:_resto["star"]);
-          restoRef.add(resto.toMap()).then((_restoDoc) {
-            if(_resto["reviews"]!=null) {
+          restoRef.add(resto.toMap()).then((_restoDoc) { // JSONのレストラン情報を保存
+            if(_resto["reviews"]!=null) { // レビューがあるレストランは、、、
               List _reviews = _resto["reviews"];
               _reviews.forEach((_review) {
-                userRef.where("name",isEqualTo:_review["username"]).getDocuments().then((snapshot) {
-                  Map _user = snapshot.documents[0].data;
-                  var documentID = _restoDoc.collection("reviews").document().documentID;
+                userRef.where("name",isEqualTo:_review["username"]).get().then((snapshot) { // 登録ユーザ情報を取得して、、、
+                  Map<String,dynamic> _user = snapshot.docs[0].data();
+                  var documentID = _restoDoc.collection("reviews").id;
                   Review review = Review(
                     id:documentID,
                     star:_review["star"],
@@ -96,7 +96,7 @@ class Resto {
                     userphotourl: _user["url"],
                     restoname: _review["restoname"],
                   );
-                  _restoDoc.collection("reviews").add(review.toMap());
+                  _restoDoc.collection("reviews").add(review.toMap()); // レストラン配下にレビューを保存
                 });
               });
           }
