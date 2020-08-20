@@ -16,13 +16,15 @@ Flutter Webのサンプルサイトは[こちら](https://david3080.github.io/au
 
 2. Flutterでpubspec.yamlでパッケージ追加
 
-   ```
-   firebase: ^7.3.0
-   firebase_auth: ^0.16.1
-   cloud_firestore: ^0.13.7
-   provider: ^4.3.2
-   openid_client: ^0.3.0
-   ```
+  ```
+  firebase_core: ^0.5.0
+  firebase_auth: ^0.18.0+1
+  cloud_firestore: ^0.14.0+1
+  firebase_storage: ^4.0.0
+  provider: ^4.3.2
+  image_picker: ^0.6.7+4
+  openid_client: ^0.3.0
+  ```
 
 3. index.htmlにJSとFlutterアプリconfigを設定
 
