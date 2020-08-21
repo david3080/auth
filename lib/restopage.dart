@@ -276,8 +276,16 @@ class RestoDetail extends StatelessWidget {
                                     child: ListTile(
                                       leading: Hero(
                                         tag: reviews[index].userphotourl,
-                                        child: CircleAvatar(
-                                          backgroundImage: NetworkImage(reviews[index].userphotourl),
+                                        child: Container(
+                                          height: 50,
+                                          width: 50,
+                                          decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                              image: NetworkImage(reviews[index].userphotourl),
+                                              fit: BoxFit.cover,
+                                            ),
+                                            borderRadius: BorderRadius.circular(5.0)
+                                          ),
                                         ),
                                       ),
                                       title: StarRating(

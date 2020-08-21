@@ -120,7 +120,7 @@ const String initRestoString = '''
       "name": "ガスト東岡崎店",
       "type": "洋食",
       "address": "愛知県岡崎市大西１丁目１−１０",
-      "logo": "https://www.skylark.co.jp/site_resource/gusto/images/logo.svg",
+      "logo": "https://raw.githubusercontent.com/david3080/auth/master/images/gusto.png",
       "star": 0.0,
       "reviews": [
         {
@@ -221,7 +221,7 @@ const String initRestoString = '''
       "name": "かつや愛知岡崎インター店",
       "type": "とんかつ",
       "address": "愛知県岡崎市大平町新寺25",
-      "logo": "https://www.arclandservice.co.jp/katsuya/wp-content/themes/arclandservice-group/assets/img/katsuya/common/logo.svg",
+      "logo": "https://raw.githubusercontent.com/david3080/auth/master/images/katsuya.png",
       "star": 0.0
     }
   ]
