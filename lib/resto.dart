@@ -30,7 +30,13 @@ class Resto {
     final String type = data['type'];
     final String address = data['address'];
     final String logo = data['logo'];
-    final double star = data['star'];
+    double star;
+    if(data['star'] is int) {
+      int star0 = data['star'];
+      star = star0.toDouble();
+    } else {
+      star = data['star'];
+    }
     return Resto(
       id: documentId,
       name: name,
@@ -66,10 +72,10 @@ class Resto {
 
   static Stream<List<Resto>> getRestosStream() {
     return restoRef.snapshots().map((snapshot) {
-          return snapshot.docs.map((snapshot) {
-                    return Resto.fromMap(snapshot.id,snapshot.data());
-                  }).toList();
-        });
+      return snapshot.docs.map((snapshot) {
+        return Resto.fromMap(snapshot.id,snapshot.data());
+      }).toList();
+    });
   }
 
   static List restos = jsonDecode(initRestoString);
@@ -115,11 +121,11 @@ const String initRestoString = '''
       "type": "洋食",
       "address": "愛知県岡崎市大西１丁目１−１０",
       "logo": "https://www.skylark.co.jp/site_resource/gusto/images/logo.svg",
-      "star": 0,
+      "star": 0.0,
       "reviews": [
         {
           "_id": 0,
-          "star": 2,
+          "star": 2.0,
           "comment": "値段の割に合わない気がする。チーズハンバーグを頼んだが、レトルトな感じでした。さらに、スープセットにしたが、スープは一種類。これなら、ステーキ宮のスープセット(4種類のスープが選びたい放題)の方がより楽しめると思う。ガストより少しお値段上がりますが。",
           "uid": 0,
           "username": "鈴木一郎",
@@ -128,16 +134,16 @@ const String initRestoString = '''
         },
         {
           "_id": 1,
-          "star": 3,
+          "star": 3.0,
           "comment": "タブレットによる注文に変わったが、慣れが必要。メニューを広げて、料理を比べたい。この方式で価格が下がればよいが、、、",
           "uid": 1,
           "username": "佐藤二郎",
-          "userphotourl": "http://www.from1-pro.jp/images/t_10/img_l.jpg?1597426029",
+          "userphotourl": "http://www.from1-pro.jp/images/t_10/img_l.jpg",
           "restoname": "ガスト東岡崎店"
         },
         {
           "_id": 2,
-          "star": 5,
+          "star": 5.0,
           "comment": "ドリンクバーが99円(単品で注文してもOK).パソコンの持ち込みOK.コンセントで充電できる.持ち帰り容器は無料.食べきれない料理の持ち帰りOK.トイレは新しくてキレイ",
           "uid": 2,
           "username": "北島三郎",
@@ -152,7 +158,7 @@ const String initRestoString = '''
       "type": "洋食",
       "address": "愛知県岡崎市美合町 字五反田２５－１",
       "logo": "https://sozainavi.com/wp-content/uploads/2019/10/dennys.jpg",
-      "star": 0
+      "star": 0.0
     },
     {
       "_id": 2,
@@ -160,7 +166,7 @@ const String initRestoString = '''
       "type": "和食",
       "address": "愛知県岡崎市井田西町１−１１",
       "logo": "https://sozainavi.com/wp-content/uploads/2019/10/ootoya.jpg",
-      "star": 0
+      "star": 0.0
     },
     {
       "_id": 3,
@@ -168,7 +174,7 @@ const String initRestoString = '''
       "type": "和食",
       "address": "愛知県岡崎市上里２丁目１−１",
       "logo": "https://sato-res.com/assets/tile/sato.png",
-      "star": 0
+      "star": 0.0
     },
     {
       "_id": 4,
@@ -176,7 +182,7 @@ const String initRestoString = '''
       "type": "カレー",
       "address": "愛知県岡崎市上地３丁目５１−６",
       "logo": "https://www.ichibanya.co.jp/assets/images/common/ogp.png",
-      "star": 0
+      "star": 0.0
     },
     {
       "_id": 5,
@@ -184,7 +190,7 @@ const String initRestoString = '''
       "type": "寿司",
       "address": "愛知県岡崎市天白町東池１５−１",
       "logo": "https://www.akindo-sushiro.co.jp/shared/images/ogp.png",
-      "star": 0
+      "star": 0.0
     },
     {
       "_id": 6,
@@ -192,7 +198,7 @@ const String initRestoString = '''
       "type": "寿司",
       "address": "愛知県岡崎市錦町２−１２",
       "logo": "https://www.watch.impress.co.jp/img/ipw/docs/1230/499/kura1_s.jpg",
-      "star": 0
+      "star": 0.0
     },
     {
       "_id": 7,
@@ -200,7 +206,7 @@ const String initRestoString = '''
       "type": "ハンバーガー",
       "address": "愛知県岡崎市大西１丁目１６−７",
       "logo": "http://www.wing-net.ne.jp/image/kamiooka/store/storage/w250/mos.png",
-      "star": 0
+      "star": 0.0
     },
     {
       "_id": 8,
@@ -208,7 +214,7 @@ const String initRestoString = '''
       "type": "ハンバーガー",
       "address": "愛知県岡崎市大平町石丸６０−１",
       "logo": "https://sozainavi.com/wp-content/uploads/2019/10/mcdonalds.png",
-      "star": 0
+      "star": 0.0
     },
     {
       "_id": 9,
@@ -216,7 +222,7 @@ const String initRestoString = '''
       "type": "とんかつ",
       "address": "愛知県岡崎市大平町新寺25",
       "logo": "https://www.arclandservice.co.jp/katsuya/wp-content/themes/arclandservice-group/assets/img/katsuya/common/logo.svg",
-      "star": 0
+      "star": 0.0
     }
   ]
 ''';

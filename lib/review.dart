@@ -23,7 +23,13 @@ class Review {
     if (data == null) {
       return null;
     }
-    final double star = data['star'];
+    double star;
+    if(data['star'] is int) {
+      int star0 = data['star'];
+      star = star0.toDouble();
+    } else {
+      star = data['star'];
+    }
     final String comment = data['comment'];
     final String uid = data['uid'];
     final String username = data['username'];
