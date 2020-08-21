@@ -363,7 +363,7 @@ class ReviewDetail extends StatelessWidget {
                     flex: 1,
                     child: Text(review.username,
                       style: TextStyle(
-                        fontSize: 30.0,
+                        fontSize: 25.0,
                         fontWeight: FontWeight.w500
                       )
                     ),
@@ -391,18 +391,20 @@ class ReviewDetail extends StatelessWidget {
                   SizedBox(height: 10.0),
                   Expanded(
                     flex: 5,
-                    child: Container(
-                      child: Text(
-                        review.comment,
-                        maxLines: 8,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black
-                        ),
-                        strutStyle: StrutStyle(
-                          fontSize: 14.0,
-                          height: 1.2
+                    child: SingleChildScrollView(
+                      child: Container(
+                        child: Text(
+                          review.comment,
+                          maxLines: 10,
+                          style: TextStyle(
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.black
+                          ),
+                          strutStyle: StrutStyle(
+                            fontSize: 14.0,
+                            height: 1.2
+                          ),
                         ),
                       ),
                     ),
@@ -452,7 +454,7 @@ class ReviewDetail extends StatelessWidget {
           ),
           Positioned( // レビュー者の顔写真
             top: screenHeight / 2 - 50.0,
-            right: 25.0,
+            right: 20.0,
             child: Hero(
               tag: review.userphotourl,
               child: Container(
