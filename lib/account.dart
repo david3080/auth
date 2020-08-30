@@ -21,7 +21,7 @@ class AccountPage extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.exit_to_app),
-            onPressed: () => User.logout(),
+            onPressed: () => User.logout(context),
           ),
         ],
         bottom: PreferredSize(

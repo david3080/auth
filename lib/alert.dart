@@ -1,23 +1,15 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
-import 'package:flutter/services.dart';
+import 'myexception.dart';
 
 class Keys {
   static const String alertDefault = 'alertDefault';
   static const String alertCancel = 'alertCancel';
 }
 
-abstract class PlatformWidget extends StatelessWidget {
-  Widget buildMaterialWidget(BuildContext context);
-  @override
-  Widget build(BuildContext context) {
-    return buildMaterialWidget(context);
-  }
-}
-
-class PlatformAlertDialog extends PlatformWidget {
-  PlatformAlertDialog({
+class MyAlertDialog extends StatelessWidget {
+  MyAlertDialog({
     @required this.title,
     @required this.content,
     this.cancelActionText,
@@ -40,6 +32,10 @@ class PlatformAlertDialog extends PlatformWidget {
   }
 
   @override
+  Widget build(BuildContext context) {
+    return buildMaterialWidget(context);
+  }
+
   Widget buildMaterialWidget(BuildContext context) {
     return AlertDialog(
       title: Text(title),
@@ -52,7 +48,7 @@ class PlatformAlertDialog extends PlatformWidget {
     final List<Widget> actions = <Widget>[];
     if (cancelActionText != null) {
       actions.add(
-        PlatformAlertDialogAction(
+        MyAlertDialogAction(
           child: Text(
             cancelActionText,
             key: Key(Keys.alertCancel),
@@ -62,7 +58,7 @@ class PlatformAlertDialog extends PlatformWidget {
       );
     }
     actions.add(
-      PlatformAlertDialogAction(
+      MyAlertDialogAction(
         child: Text(
           defaultActionText,
           key: Key(Keys.alertDefault),
@@ -74,12 +70,16 @@ class PlatformAlertDialog extends PlatformWidget {
   }
 }
 
-class PlatformAlertDialogAction extends PlatformWidget {
-  PlatformAlertDialogAction({this.child, this.onPressed});
+class MyAlertDialogAction extends StatelessWidget {
+  MyAlertDialogAction({this.child, this.onPressed});
   final Widget child;
   final ui.VoidCallback onPressed;
 
   @override
+  Widget build(BuildContext context) {
+    return buildMaterialWidget(context);
+  }
+  
   Widget buildMaterialWidget(BuildContext context) {
     return FlatButton(
       child: child,
@@ -88,33 +88,12 @@ class PlatformAlertDialogAction extends PlatformWidget {
   }
 }
 
-class PlatformExceptionAlertDialog extends PlatformAlertDialog {
-  PlatformExceptionAlertDialog(
-      {@required String title, @required PlatformException exception})
+class MyExceptionAlertDialog extends MyAlertDialog {
+  MyExceptionAlertDialog(
+      {@required String title, @required MyException exception})
       : super(
           title: title,
-          content: message(exception),
+          content: exception.message,
           defaultActionText: 'OK',
         );
-
-  static String message(PlatformException exception) {
-    if (exception.message == 'FIRFirestoreErrorDomain') {
-      if (exception.code == 'Code 7') {
-        return 'This operation could not be completed due to a server error';
-      }
-      return exception.details;
-    }
-    return errors[exception.code] ?? exception.message;
-  }
-
-  static Map<String, String> errors = {
-    'ERROR_WEAK_PASSWORD': 'パスワードは8文字以上である必要があります。再入力してください。',
-    'ERROR_INVALID_CREDENTIAL': 'ログインする権限がありません。',
-    'ERROR_EMAIL_ALREADY_IN_USE': 'このメールアドレスはすでに登録されています。',
-    'ERROR_INVALID_EMAIL': 'メールアドレスのフォーマットに誤りがあります。再入力してください。',
-    'ERROR_WRONG_PASSWORD': 'パスワードが異なります。',
-    'ERROR_USER_NOT_FOUND': 'メールアドレスが登録されていません。',
-    'ERROR_TOO_MANY_REQUESTS': 'このデバイスからのアクセスはブロックされています。時間をおいてから試してください。',
-    'ERROR_OPERATION_NOT_ALLOWED': 'ログインする権限がありません。',
-  };
 }

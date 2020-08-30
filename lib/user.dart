@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'alert.dart';
+import 'myexception.dart';
+
 final auth = FirebaseAuth.instance;
 final userRef = FirebaseFirestore.instance.collection("users");
 
@@ -53,16 +56,23 @@ class User {
     );
   }
 
-  static Future<void> register(String email, String password) async {
-    UserCredential cred = await auth.createUserWithEmailAndPassword(
+  static Future<void> register(String email, String password, BuildContext context) async {
+    auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
-    );
-    User user = User(uid: cred.user.uid, email: cred.user.email);
-    userRef.doc(cred.user.uid).set(user.toMap());
+    ).then((cred) {
+      User user = User(uid: cred.user.uid, email: cred.user.email);
+      userRef.doc(cred.user.uid).set(user.toMap());
+    }).catchError((e){
+      print(e.toString());
+      MyExceptionAlertDialog(
+        title: "ユーザ登録に失敗しました",
+        exception: MyException(exception: e),
+      ).show(context);
+    });
   }
 
-  static Future<void> login(String email, String password) async {
+  static Future<void> login(String email, String password, BuildContext context) async {
     auth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -77,11 +87,23 @@ class User {
           }
         });
       }
+    }).catchError((e){
+      MyExceptionAlertDialog(
+        title: "ログインに失敗しました",
+        exception: MyException(exception: e),
+      ).show(context);
     });
   }
 
-  static Future<void> logout() {
-    return auth.signOut();
+  static Future<void> logout(BuildContext context) async {
+    bool logout = await MyAlertDialog(
+      title:"ログアウト",
+      content:"ログアウトしますか？",
+      defaultActionText:"はい",
+      cancelActionText:"いいえ",).show(context);
+    if(logout) {
+      return auth.signOut();
+    }
   }
 
   Future<void> setUser({bool merge = false}) {

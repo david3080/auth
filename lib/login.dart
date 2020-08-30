@@ -11,10 +11,13 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String _email;
-  void setEmail(value) => _email = value;
-  String _password;
-  void setPassword(value) => _password = value;
+  TextEditingController _email = TextEditingController();
+  TextEditingController _password = TextEditingController();
+
+  final _formKey = GlobalKey<FormState>();
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+
   LoginType _loginType = LoginType.login;
   String get primaryButtonText {
     return _loginType == LoginType.login ? "ログイン" : "ユーザ登録";
@@ -23,14 +26,10 @@ class _LoginPageState extends State<LoginPage> {
     return _loginType == LoginType.login ? "ユーザ登録" : "ログイン";
   }
 
-  final _formKey = GlobalKey<FormState>();
-  final FocusNode _emailFocusNode = FocusNode();
-  final FocusNode _passwordFocusNode = FocusNode();
-
   @override
   void dispose() {
-    _emailFocusNode.dispose();
-    _passwordFocusNode.dispose();
+    _email.dispose();
+    _password.dispose();
     super.dispose();
   }
 
@@ -49,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 TextFormField(
-                  onChanged: setEmail,
+                  controller: _email,
                   focusNode: _emailFocusNode,
                   onEditingComplete: () =>
                       FocusScope.of(context).requestFocus(_passwordFocusNode),
@@ -72,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                   height: 30,
                 ),
                 TextFormField(
-                  onChanged: setPassword,
+                  controller: _password,
                   focusNode: _passwordFocusNode,
                   onEditingComplete: () => _submit(context),
                   validator: (value) {
@@ -124,28 +123,21 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _submit(BuildContext context) {
-    try {
-      final form = _formKey.currentState;
-      if (form.validate()) {
-        User.login(_email,_password);
-      }
-    } on PlatformException catch (e) {
-      PlatformExceptionAlertDialog(
-        title: "ログインが失敗しました",
-        exception: e,
-      ).show(context);
+  void _submit(BuildContext context) async {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      await User.login(_email.value.text,_password.value.text,context);
     }
   }
 
-  Future<void> _register(BuildContext context) async {
+  void _register(BuildContext context) {
     try {
       final form = _formKey.currentState;
       if (form.validate()) {
-        User.register(_email, _password);
+        User.register(_email.value.text,_password.value.text,context);
       }
-    } on PlatformException catch (e) {
-      PlatformExceptionAlertDialog(
+    } catch (e) {
+      MyExceptionAlertDialog(
         title: "ユーザ登録が失敗しました",
         exception: e,
       ).show(context);

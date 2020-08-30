@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +23,7 @@ class Review {
       return null;
     }
     double star;
-    if(data['star'] is int) {
+    if(data['star'] is int) { // マップ上の値がintならdoubleに変換してセット
       int star0 = data['star'];
       star = star0.toDouble();
     } else {

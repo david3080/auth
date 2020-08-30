@@ -70,7 +70,7 @@ packages:
       name: cloud_firestore
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.14.0+1"
+    version: "0.14.0+2"
   cloud_firestore_platform_interface:
     dependency: transitive
     description:
@@ -246,7 +246,7 @@ packages:
       name: image_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.6.7+4"
+    version: "0.6.7+7"
   image_picker_platform_interface:
     dependency: transitive
     description:
@@ -309,7 +309,7 @@ packages:
       name: openid_client
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.0"
+    version: "0.3.1"
   path:
     dependency: transitive
     description:
@@ -323,7 +323,7 @@ packages:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.9.0"
+    version: "1.9.2"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -344,7 +344,7 @@ packages:
       name: provider
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.2"
+    version: "4.3.2+1"
   quiver:
     dependency: transitive
     description:
@@ -358,7 +358,7 @@ packages:
       name: responsive_grid
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.0"
+    version: "1.2.1+1"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -426,7 +426,7 @@ packages:
       name: uuid
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.0"
+    version: "2.2.2"
   vector_math:
     dependency: transitive
     description:

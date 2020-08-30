@@ -9,34 +9,47 @@ final restoRef = FirebaseFirestore.instance.collection("restos");
 final userRef = FirebaseFirestore.instance.collection("users");
 
 class Resto {
-  Resto({@required this.id, @required this.name, this.type, this.address, this.logo, this.star});
+  Resto({
+    @required this.id,
+    @required this.name,
+    this.type,
+    this.address,
+    this.logo,
+    this.star,
+    this.reviewCount,
+    this.totalStarCount,
+  });
   final String id;
   final String name;
   final String type;
   final String address;
   final String logo;
   final double star;
+  final int reviewCount;
+  final int totalStarCount;
 
   @override
   String toString() {
-    return "id:$id,name:$name,type:$type,address:$address,logo:$logo,star:$star";
+    return "id:$id,name:$name,type:$type,address:$address,logo:$logo,star:$star,reviewCount:$reviewCount,totalStarCount:$totalStarCount";
   }
 
   factory Resto.fromMap(String documentId, Map<String, dynamic> data) {
-    if (data == null) {
+    if (documentId==null||documentId==""||data==null) {
       return null;
     }
-    final String name = data['name'];
+    final String name = data['name']??""; // @requiredなのでnull値でなく空白""をセット
     final String type = data['type'];
     final String address = data['address'];
     final String logo = data['logo'];
     double star;
-    if(data['star'] is int) {
+    if(data['star'] is int) { // マップ上の値がintならdoubleに変換してセット
       int star0 = data['star'];
       star = star0.toDouble();
     } else {
       star = data['star'];
     }
+    final int reviewCount = data['reviewCount'];
+    final int totalStarCount = data['totalStarCount'];
     return Resto(
       id: documentId,
       name: name,
@@ -44,6 +57,8 @@ class Resto {
       address: address,
       logo: logo,
       star: star,
+      reviewCount: reviewCount,
+      totalStarCount: totalStarCount,
     );
   }
 
@@ -54,19 +69,23 @@ class Resto {
       "type": type,
       "address": address,
       "logo": logo,
-      "star": star
+      "star": star,
+      "reviewCount": reviewCount,
+      "totalStarCount": totalStarCount,
     };
   }
 
   Resto copy(
-      {String id, String name, String type, String address, String logo, double star}) {
+      {String id,String name,String type,String address,String logo,double star,int reviewCount,int totalStarCount,}) {
     return Resto(
       id: id != null ? id : this.id,
-      name: name != null ? name : this.name,
-      type: type != null ? type : this.type,
-      address: address != null ? address : this.address,
-      logo: logo != null ? logo : this.logo,
+      name: name != null ? name: this.name,
+      type: type != null ? type: this.type,
+      address: address != null ? address: this.address,
+      logo: logo != null ? logo: this.logo,
       star: star != null ? star : this.star,
+      reviewCount: reviewCount != null ? reviewCount: this.reviewCount,
+      totalStarCount: totalStarCount != null ? totalStarCount: this.totalStarCount,
     );
   }
 
@@ -82,26 +101,39 @@ class Resto {
   // レストランコレクションがなければ初期データをセット
   static void initRestos() {
     restoRef.get().then((snapshot) {
-      if(snapshot.docs.length == 0) {
+      if(snapshot.size == 0) {
         restos.forEach((_resto) {
-          var documentID = restoRef.id;
-          Resto resto = Resto(id:documentID,name:_resto["name"],type:_resto["type"],address:_resto["address"],logo:_resto["logo"],star:_resto["star"]);
+          Resto resto = Resto.fromMap(restoRef.id, _resto); // documentIDをセットするため一旦Restoに変換
           restoRef.add(resto.toMap()).then((_restoDoc) { // JSONのレストラン情報を保存
             if(_resto["reviews"]!=null) { // レビューがあるレストランは、、、
+              // JSONからレビュー情報を取得
               List _reviews = _resto["reviews"];
+
+              // レビュー数とトータル星数をセット
+              int _reviewCount = _reviews.length;
+              int _totalStarCount = 0;
+              _reviews.forEach((_review) {
+                _totalStarCount += _review["star"];
+              });
+              double _star = (_totalStarCount/_reviewCount);
+
+              // レストランのレビュー情報を更新
+              Resto _newResto = resto.copy(
+                star:_star,
+                reviewCount:_reviewCount,
+                totalStarCount:_totalStarCount,
+              );
+              _restoDoc.set(_newResto.toMap());
+
+              // レストラン配下にレビューリストを追加
               _reviews.forEach((_review) {
                 userRef.where("name",isEqualTo:_review["username"]).get().then((snapshot) { // 登録ユーザ情報を取得して、、、
                   Map<String,dynamic> _user = snapshot.docs[0].data();
                   var documentID = _restoDoc.collection("reviews").id;
-                  Review review = Review(
-                    id:documentID,
-                    star:_review["star"],
-                    comment:_review["comment"],
-                    uid:_user["uid"],
-                    username: _user["name"],
-                    userphotourl: _user["url"],
-                    restoname: _review["restoname"],
-                  );
+                  _review["uid"] = _user["uid"];
+                  _review["username"] = _user["name"];
+                  _review["userphotourl"] = _user["url"];
+                  Review review = Review.fromMap(documentID, _review);
                   _restoDoc.collection("reviews").add(review.toMap()); // レストラン配下にレビューを保存
                 });
               });
@@ -121,11 +153,13 @@ const String initRestoString = '''
       "type": "洋食",
       "address": "愛知県岡崎市大西１丁目１−１０",
       "logo": "https://raw.githubusercontent.com/david3080/auth/master/images/gusto.png",
-      "star": 0.0,
+      "star": 0,
+      "reviewCount": 0,
+      "totalStarCount": 10,
       "reviews": [
         {
           "_id": 0,
-          "star": 2.0,
+          "star": 2,
           "comment": "値段の割に合わない気がする。チーズハンバーグを頼んだが、レトルトな感じでした。さらに、スープセットにしたが、スープは一種類。これなら、ステーキ宮のスープセット(4種類のスープが選びたい放題)の方がより楽しめると思う。ガストより少しお値段上がりますが。",
           "uid": 0,
           "username": "鈴木一郎",
@@ -134,7 +168,7 @@ const String initRestoString = '''
         },
         {
           "_id": 1,
-          "star": 3.0,
+          "star": 3,
           "comment": "タブレットによる注文に変わったが、慣れが必要。メニューを広げて、料理を比べたい。この方式で価格が下がればよいが、、、",
           "uid": 1,
           "username": "佐藤二郎",
@@ -143,7 +177,7 @@ const String initRestoString = '''
         },
         {
           "_id": 2,
-          "star": 5.0,
+          "star": 5,
           "comment": "ドリンクバーが99円(単品で注文してもOK).パソコンの持ち込みOK.コンセントで充電できる.持ち帰り容器は無料.食べきれない料理の持ち帰りOK.トイレは新しくてキレイ",
           "uid": 2,
           "username": "北島三郎",
