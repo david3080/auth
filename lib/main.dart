@@ -37,28 +37,30 @@ class _LandingState extends State<Landing> {
   @override
   void initState() {
     Firebase.initializeApp();
-    Resto.initRestos();
+    Resto.initRestos(); // データベースの初期化
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<auth.User>(
-        stream: auth.FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.active) {
-            auth.User user = snapshot.data;
-            if (user == null) {
-              return LoginPage();
-            }
-            return HomePage(uid:user.uid,email:user.email);
+    return StreamBuilder<auth.User> (
+      stream: auth.FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.active) {
+          auth.User _authUser = snapshot.data;
+          if (_authUser == null) {
+            return LoginPage();
           } else {
-            return Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
+            return HomePage();
           }
-        });
+        } else {
+          return Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+      },
+    );
   }
 }

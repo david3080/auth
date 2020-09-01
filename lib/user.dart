@@ -1,18 +1,17 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 
 import 'alert.dart';
 import 'myexception.dart';
 
-final auth = FirebaseAuth.instance;
-final userRef = FirebaseFirestore.instance.collection("users");
+final userColRef = FirebaseFirestore.instance.collection("users");
 
-// ユーザ情報のモデルとBlocを一緒にしたクラス
+// ユーザクラス
 class User {
-  User({@required this.uid, @required this.email, this.name, this.url});
+  User({@required this.uid,@required this.email,this.name,this.url});
   final String uid;
   final String email;
   final String name;
@@ -56,15 +55,25 @@ class User {
     );
   }
 
+  Future<void> setUser({bool merge = false}) {
+    return userColRef.doc(uid).set(this.toMap(),SetOptions(merge:merge));
+  }
+
+  // ログインユーザからユーザを作成
+  static Future<User> getUserFromAuth(auth.User _authUser) async {
+    DocumentSnapshot snapshot = await userColRef.doc(_authUser.uid).get();
+    return User.fromMap(snapshot.id,snapshot.data());
+  }
+
   static Future<void> register(String email, String password, BuildContext context) async {
-    auth.createUserWithEmailAndPassword(
+    await auth.FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
       password: password,
     ).then((cred) {
+      // データベースにユーザ情報を登録
       User user = User(uid: cred.user.uid, email: cred.user.email);
-      userRef.doc(cred.user.uid).set(user.toMap());
+      userColRef.doc(cred.user.uid).set(user.toMap());
     }).catchError((e){
-      print(e.toString());
       MyExceptionAlertDialog(
         title: "ユーザ登録に失敗しました",
         exception: MyException(exception: e),
@@ -73,21 +82,20 @@ class User {
   }
 
   static Future<void> login(String email, String password, BuildContext context) async {
-    auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
+    await auth.FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
     ).then((result) {
       if(result != null) {
-        userRef.doc(result.user.uid).get().then((snapshot) {
-          // データベースにユーザ情報がなければ初期化
-          if(snapshot.data == null) {
+        userColRef.doc(result.user.uid).get().then((snapshot) {
+          if(snapshot.data == null) { // データベースにユーザ情報がなければ初期化
             User user = User(uid:result.user.uid,email:result.user.email);
-            User newUser = User.initUser(user); // initUserStringに定義されたユーザなら情報コピー
-            userRef.doc(newUser.uid).set(newUser.toMap());
+            User newUser = initUser(user); // initUserStringに定義されたユーザなら情報コピー
+            userColRef.doc(newUser.uid).set(newUser.toMap());
           }
         });
       }
-    }).catchError((e){
+    }).catchError((e) {
       MyExceptionAlertDialog(
         title: "ログインに失敗しました",
         exception: MyException(exception: e),
@@ -102,16 +110,12 @@ class User {
       defaultActionText:"はい",
       cancelActionText:"いいえ",).show(context);
     if(logout) {
-      return auth.signOut();
+      return auth.FirebaseAuth.instance.signOut();
     }
   }
 
-  Future<void> setUser({bool merge = false}) {
-    return userRef.doc(uid).set(this.toMap(),SetOptions(merge:merge));
-  }
-
   static Stream<User> getUserStream(String uid) {
-    return userRef.doc(uid).snapshots().map((snapshot)=>User.fromMap(uid,snapshot.data()));
+    return userColRef.doc(uid).snapshots().map((snapshot)=>User.fromMap(uid,snapshot.data()));
   }
 
   static List users = jsonDecode(initUserString);

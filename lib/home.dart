@@ -1,14 +1,13 @@
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'account.dart';
 import 'restopage.dart';
+import 'reviewpage.dart';
+
+final userColRef = FirebaseFirestore.instance.collection("users");
 
 class HomePage extends StatefulWidget {
-  final String uid;
-  final String email;
-  HomePage({Key key,this.uid,this.email}) : super(key: key);
-
   _HomePageState createState() => _HomePageState();
 }
 
@@ -29,7 +28,8 @@ class _HomePageState extends State<HomePage> {
         controller: _pageController,
         children: <Widget>[
           RestoPage(),
-          AccountPage(uid:widget.uid,email:widget.email),
+          ReviewPage(),
+          AccountPage(),
         ],
         physics: NeverScrollableScrollPhysics(),
       ),
@@ -41,6 +41,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.restaurant),
             label: "レストラン",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.rate_review),
+            label: "レビュー",
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),

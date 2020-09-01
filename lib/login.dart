@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'alert.dart';
 import 'user.dart';
 
 enum LoginType { login, register }
@@ -37,110 +36,101 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
-          height: screenHeight,
-          padding: EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                TextFormField(
-                  controller: _email,
-                  focusNode: _emailFocusNode,
-                  onEditingComplete: () =>
-                      FocusScope.of(context).requestFocus(_passwordFocusNode),
-                  validator: (value) {
-                    if (value == null || value.length == 0)
-                      return "メールアドレスを入力してください";
-                    else
-                      return null;
-                  },
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.email),
-                    labelText: "Email",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
+      body: Container(
+        height: screenHeight,
+        padding: EdgeInsets.all(20),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              TextFormField(
+                controller: _email,
+                focusNode: _emailFocusNode,
+                onEditingComplete: () =>
+                    FocusScope.of(context).requestFocus(_passwordFocusNode),
+                validator: (value) {
+                  if (value == null || value.length == 0)
+                    return "メールアドレスを入力してください";
+                  else
+                    return null;
+                },
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.email),
+                  labelText: "Email",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.0),
                   ),
                 ),
-                SizedBox(
-                  height: 30,
+              ),
+              SizedBox(
+                height: 30,
+              ),
+              TextFormField(
+                controller: _password,
+                focusNode: _passwordFocusNode,
+                onEditingComplete: () => _login(context),
+                validator: (value) {
+                  if (value == null || value.length == 0)
+                    return "パスワードを入力してください";
+                  else
+                    return null;
+                },
+                obscureText: true,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.lock),
+                  labelText: "Password",
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
                 ),
-                TextFormField(
-                  controller: _password,
-                  focusNode: _passwordFocusNode,
-                  onEditingComplete: () => _submit(context),
-                  validator: (value) {
-                    if (value == null || value.length == 0)
-                      return "パスワードを入力してください";
-                    else
-                      return null;
-                  },
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.lock),
-                    labelText: "Password",
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20.0)),
-                  ),
+              ),
+              SizedBox(
+                height: 30,
+              ),
+              RaisedButton(
+                child: Text(
+                  primaryButtonText,
+                  style: TextStyle(fontSize: 20, color: Colors.white),
                 ),
-                SizedBox(
-                  height: 30,
+                onPressed: () async {
+                  if (_loginType == LoginType.login) {
+                    _login(context);
+                  } else {
+                    _register(context);
+                  }
+                },
+                padding: EdgeInsets.all(10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
-                RaisedButton(
-                  child: Text(
-                    primaryButtonText,
-                    style: TextStyle(fontSize: 20, color: Colors.white),
-                  ),
-                  onPressed: () {
-                    if (_loginType == LoginType.login) {
-                      _submit(context);
-                    } else {
-                      _register(context);
-                    }
-                  },
-                  padding: EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+              ),
+              FlatButton(
+                child: Text(
+                  secondaryButtonText,
+                  style: TextStyle(fontSize: 20, color: Colors.black),
                 ),
-                FlatButton(
-                  child: Text(
-                    secondaryButtonText,
-                    style: TextStyle(fontSize: 20, color: Colors.black),
-                  ),
-                  onPressed: () => _changeLoginType(),
-                ),
-              ],
-            ),
+                onPressed: () => _changeLoginType(),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  void _submit(BuildContext context) async {
+  void _login(BuildContext context) async {
     final form = _formKey.currentState;
     if (form.validate()) {
       await User.login(_email.value.text,_password.value.text,context);
     }
   }
 
-  void _register(BuildContext context) {
-    try {
-      final form = _formKey.currentState;
-      if (form.validate()) {
-        User.register(_email.value.text,_password.value.text,context);
-      }
-    } catch (e) {
-      MyExceptionAlertDialog(
-        title: "ユーザ登録が失敗しました",
-        exception: e,
-      ).show(context);
+  void _register(BuildContext context) async {
+    final form = _formKey.currentState;
+    if (form.validate()) {
+      await User.register(_email.value.text,_password.value.text,context);
     }
   }
 

@@ -1,158 +1,169 @@
+import 'package:auth/starrating.dart';
 import 'package:flutter/material.dart';
-
-import 'restopage.dart';
 import 'review.dart';
+import 'reviewdetail.dart';
 
-class ReviewDetail extends StatelessWidget {
-  ReviewDetail({@required this.review,this.restoLogo});
+class ReviewPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<List<Review>>(
+      stream: Review.getReviwsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final List<Review> reviews = snapshot.data;
+          if (reviews.isNotEmpty) {
+            return Scaffold(
+              appBar: AppBar(
+                centerTitle: true,
+                title: Text(
+                  "レビュー",
+                  style: TextStyle(fontSize: 20, color: Colors.white),
+                ),
+              ),
+              body: ListView.builder(
+                itemCount: reviews.length,
+                itemBuilder: (BuildContext context, int index) {
+                  var inkWell = InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => UserReviewDetail(review:reviews[index]),
+                      ));
+                    },
+                    child: RestoUserReviewListTile(review:reviews[index]),
+                  );
+                  return inkWell;
+                }
+              ),
+            );
+          } else {
+            return Container(child: Center(child: Text("Empty...")));
+          }
+        } else {
+          return Container(child: Center(child: CircularProgressIndicator()));
+        }
+      }
+    );
+  }
+}
+
+// ユーザ画像を表示するタイル
+class UserReviewListTile extends StatelessWidget {
+  UserReviewListTile({@required this.review});
   final Review review;
-  final String restoLogo;
 
   @override
   Widget build(BuildContext context) {
-    var screenHeight = MediaQuery.of(context).size.height;
-    var screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          Container(
-            height: screenHeight,
-            width: screenWidth,
-            color: Colors.transparent
+    return ListTile(
+      leading: Hero(
+        tag: review.id,
+        child: Container(
+          height: 50,
+          width: 50,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: NetworkImage(review.userphotourl),
+              fit: BoxFit.cover,
+            ),
+            borderRadius: BorderRadius.circular(5.0)
           ),
+        ),
+      ),
+      title: StarRating(
+        rating: review.star.toDouble(),
+      ),
+      subtitle: Text(
+        review.comment,
+        style: TextStyle(fontSize:10),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      ),
+      trailing: Icon(Icons.keyboard_arrow_right),
+    );
+  }
+}
+
+// レストラン画像を表示するタイル
+class RestoReviewListTile extends StatelessWidget {
+  RestoReviewListTile({@required this.review});
+  final Review review;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        height: 50,
+        width: 50,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: NetworkImage(review.restologo),
+            fit: BoxFit.cover,
+          ),
+          borderRadius: BorderRadius.circular(5.0)
+        ),
+      ),
+      title: StarRating(
+        rating: review.star.toDouble(),
+      ),
+      subtitle: Text(
+        review.comment,
+        style: TextStyle(fontSize:10),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      ),
+      trailing: Icon(Icons.keyboard_arrow_right),
+    );
+  }
+}
+
+// レストランとユーザ画像を表示するタイル
+class RestoUserReviewListTile extends StatelessWidget {
+  RestoUserReviewListTile({@required this.review});
+  final Review review;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Hero(
+        tag: review.id,
+        child: Container(
+          height: 50,
+          width: 50,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: NetworkImage(review.userphotourl),
+              fit: BoxFit.cover,
+            ),
+            borderRadius: BorderRadius.circular(5.0)
+          ),
+        ),
+      ),
+      title: Row(
+        children: [
           Container(
-            height: screenHeight / 2,
-            width: screenWidth,
+            padding: EdgeInsets.only(top:5),
+            height: 30,
+            width: 30,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage(restoLogo),
-                fit: BoxFit.cover
-              )
-            )
-          ),
-          Positioned(
-            top: screenHeight/2 + 50.0,
-            child: Container(
-              padding: EdgeInsets.only(left:20.0,right:20.0),
-              height: screenHeight / 2 + 25.0,
-              width: screenWidth,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 10.0),
-                  Expanded(
-                    flex: 1,
-                    child: Text(review.username,
-                      style: TextStyle(
-                        fontSize: 25.0,
-                        fontWeight: FontWeight.w500
-                      )
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
-                  Expanded(
-                    flex: 1,
-                    child: Row(
-                      children: <Widget>[
-                        StarRating(
-                          rating: review.star,
-                          size: 30.0,
-                        ),
-                        SizedBox(width: 10.0),
-                        Text(review.star.toString(),
-                          style: TextStyle(
-                            fontSize: 30.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black,
-                          )
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
-                  Expanded(
-                    flex: 5,
-                    child: SingleChildScrollView(
-                      child: Container(
-                        child: Text(
-                          review.comment,
-                          maxLines: 10,
-                          style: TextStyle(
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black
-                          ),
-                          strutStyle: StrutStyle(
-                            fontSize: 14.0,
-                            height: 1.2
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ]
+                image: NetworkImage(review.restologo),
+                fit: BoxFit.fill,
               ),
-            )
+              borderRadius: BorderRadius.circular(5.0)
+            ),
           ),
-          Align( // レビューリストに戻る
-            alignment: Alignment.topLeft,
-            child: InkWell(
-              child: Padding(
-                padding: EdgeInsets.only(left: 15.0, top: 30.0),
-                child: Container(
-                  height: 40.0,
-                  width: 40.0,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.grey,
-                  ),
-                  child: Center(
-                    child: InkWell(
-                      child: Icon(Icons.arrow_back,size:20.0,color:Colors.white),
-                      onTap: () => Navigator.of(context).pop(),
-                    )
-                  )
-                )
-              ),
-            )
+          SizedBox(width:10),
+          StarRating(
+            rating: review.star.toDouble(),
           ),
-          Align( // レビューを編集に切り替える
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: EdgeInsets.only(right: 15.0, top: 30.0),
-              child: Container(
-                height: 40.0,
-                width: 40.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey,
-                ),
-                child: Center(
-                  child: Icon(Icons.edit,size:20.0,color:Colors.white)
-                )
-              )
-            )
-          ),
-          Positioned( // レビュー者の顔写真
-            top: screenHeight / 2 - 50.0,
-            right: 20.0,
-            child: Hero(
-              tag: review.userphotourl,
-              child: Container(
-                height: 150.0,
-                width: 150.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(review.userphotourl),
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: BorderRadius.circular(15.0)
-                )
-              )
-            )
-          )
         ],
-      )
+      ),
+      subtitle: Text(
+        review.comment,
+        style: TextStyle(fontSize:10),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      ),
+      trailing: Icon(Icons.keyboard_arrow_right),
     );
   }
 }

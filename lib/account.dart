@@ -1,16 +1,23 @@
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
+import 'review.dart';
+import 'reviewdetail.dart';
+import 'reviewpage.dart';
 import 'user.dart';
 
-class AccountPage extends StatelessWidget {
-  AccountPage({this.uid,this.email});
-  final String uid;
-  final String email;
+class AccountPage extends StatefulWidget {
+  @override
+  _AccountPageState createState() => _AccountPageState();
+}
+
+class _AccountPageState extends State<AccountPage> {
   final TextEditingController nameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    auth.User authUser = auth.FirebaseAuth.instance.currentUser;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -27,7 +34,7 @@ class AccountPage extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(300),
           child: StreamBuilder<User>(
-            stream: User.getUserStream(uid),
+            stream: User.getUserStream(authUser.uid),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.active && snapshot.hasData) {
                 final user = snapshot.data;
@@ -74,6 +81,33 @@ class AccountPage extends StatelessWidget {
             },
           ),
         ),
+      ),
+      body: StreamBuilder<List<Review>>(
+        stream: Review.getUserReviwsStream(authUser.uid),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final List<Review> reviews = snapshot.data;
+            if (reviews.isNotEmpty) {
+              return ListView.builder(
+                itemCount: reviews.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ReviewDetail(review:reviews[index]))
+                      ).then((_) => setState((){})); // 画面をリロードする
+                    },
+                    child: RestoReviewListTile(review:reviews[index]),
+                  );
+                }
+              );
+            } else {
+              return Container(child: Center(child: Text("Empty...")));
+            }
+          } else {
+            return Container(child: Center(child: CircularProgressIndicator()));
+          }
+        }
       ),
     );
   }

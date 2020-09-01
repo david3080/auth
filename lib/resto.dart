@@ -3,10 +3,8 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'review.dart';
-
-final restoRef = FirebaseFirestore.instance.collection("restos");
-final userRef = FirebaseFirestore.instance.collection("users");
+final restoColRef = FirebaseFirestore.instance.collection("restos");
+final userColRef = FirebaseFirestore.instance.collection("users");
 
 class Resto {
   Resto({
@@ -15,9 +13,9 @@ class Resto {
     this.type,
     this.address,
     this.logo,
-    this.star,
-    this.reviewCount,
-    this.totalStarCount,
+    this.star = 0.0,
+    this.reviewCount = 0,
+    this.totalStarCount = 0,
   });
   final String id;
   final String name;
@@ -46,10 +44,10 @@ class Resto {
       int star0 = data['star'];
       star = star0.toDouble();
     } else {
-      star = data['star'];
+      star = data['star']??0.0;
     }
-    final int reviewCount = data['reviewCount'];
-    final int totalStarCount = data['totalStarCount'];
+    final int reviewCount = data['reviewCount']??0;
+    final int totalStarCount = data['totalStarCount']??0;
     return Resto(
       id: documentId,
       name: name,
@@ -90,7 +88,7 @@ class Resto {
   }
 
   static Stream<List<Resto>> getRestosStream() {
-    return restoRef.snapshots().map((snapshot) {
+    return restoColRef.snapshots().map((snapshot) {
       return snapshot.docs.map((snapshot) {
         return Resto.fromMap(snapshot.id,snapshot.data());
       }).toList();
@@ -100,44 +98,48 @@ class Resto {
   static List restos = jsonDecode(initRestoString);
   // レストランコレクションがなければ初期データをセット
   static void initRestos() {
-    restoRef.get().then((snapshot) {
+    restoColRef.get().then((snapshot) {
       if(snapshot.size == 0) {
         restos.forEach((_resto) {
-          Resto resto = Resto.fromMap(restoRef.id, _resto); // documentIDをセットするため一旦Restoに変換
-          restoRef.add(resto.toMap()).then((_restoDoc) { // JSONのレストラン情報を保存
-            if(_resto["reviews"]!=null) { // レビューがあるレストランは、、、
+          var _restoDocRef = restoColRef.doc(); // レストランドキュメント参照の初期化
+          Resto resto = Resto.fromMap(_restoDocRef.id, _resto); // レストランにdocumentIdをセット
+          _restoDocRef.set(resto.toMap()).then((_) { // レストラン情報を保存
+            if(_resto["reviews"]!=null) { // レストランにレビューがある場合
               // JSONからレビュー情報を取得
               List _reviews = _resto["reviews"];
-
-              // レビュー数とトータル星数をセット
-              int _reviewCount = _reviews.length;
-              int _totalStarCount = 0;
-              _reviews.forEach((_review) {
-                _totalStarCount += _review["star"];
-              });
-              double _star = (_totalStarCount/_reviewCount);
-
-              // レストランのレビュー情報を更新
-              Resto _newResto = resto.copy(
-                star:_star,
-                reviewCount:_reviewCount,
-                totalStarCount:_totalStarCount,
-              );
-              _restoDoc.set(_newResto.toMap());
-
               // レストラン配下にレビューリストを追加
               _reviews.forEach((_review) {
-                userRef.where("name",isEqualTo:_review["username"]).get().then((snapshot) { // 登録ユーザ情報を取得して、、、
+                userColRef.where("name",isEqualTo:_review["username"]).get().then((snapshot) async { // 登録ユーザ情報取得
                   Map<String,dynamic> _user = snapshot.docs[0].data();
-                  var documentID = _restoDoc.collection("reviews").id;
                   _review["uid"] = _user["uid"];
                   _review["username"] = _user["name"];
                   _review["userphotourl"] = _user["url"];
-                  Review review = Review.fromMap(documentID, _review);
-                  _restoDoc.collection("reviews").add(review.toMap()); // レストラン配下にレビューを保存
+                  _review["restoid"] = resto.id;
+                  _review["restoname"] = resto.name;
+                  _review["restologo"] = resto.logo;
+                  DocumentReference _reviewDocRef = _restoDocRef.collection("reviews").doc();
+                  _review["id"] = _reviewDocRef.id;
+                  _reviewDocRef.set(_review);
                 });
               });
-          }
+              // レストランの平均星数を計算
+              int reviewCount = 0;
+              int totalStarCount = 0;
+              _reviews.forEach((_review) {
+                  reviewCount = reviewCount + 1;
+                  if(_review["star"] is int) {
+                    int _star = _review["star"];
+                    totalStarCount = totalStarCount + _star;
+                  } else if(_review["star"] is double) {
+                    double _star = _review["star"];
+                    totalStarCount = totalStarCount + _star.toInt();
+                  }
+              });
+              // レストランの平均星数を更新
+              double star = totalStarCount/reviewCount;
+              Resto newResto = resto.copy(reviewCount:reviewCount,totalStarCount:totalStarCount,star:star);
+              _restoDocRef.set(newResto.toMap(),SetOptions(merge:true));
+            }
           });
         });
       }
@@ -153,9 +155,6 @@ const String initRestoString = '''
       "type": "洋食",
       "address": "愛知県岡崎市大西１丁目１−１０",
       "logo": "https://raw.githubusercontent.com/david3080/auth/master/images/gusto.png",
-      "star": 0,
-      "reviewCount": 0,
-      "totalStarCount": 10,
       "reviews": [
         {
           "_id": 0,
@@ -164,7 +163,8 @@ const String initRestoString = '''
           "uid": 0,
           "username": "鈴木一郎",
           "userphotourl": "https://meikyu-kai.org/wp-content/uploads/2020/01/51_Ichiro.jpg",
-          "restoname": "ガスト東岡崎店"
+          "restoname": "ガスト東岡崎店",
+          "restologo": "https://raw.githubusercontent.com/david3080/auth/master/images/gusto.png"
         },
         {
           "_id": 1,
@@ -173,7 +173,8 @@ const String initRestoString = '''
           "uid": 1,
           "username": "佐藤二郎",
           "userphotourl": "http://www.from1-pro.jp/images/t_10/img_l.jpg",
-          "restoname": "ガスト東岡崎店"
+          "restoname": "ガスト東岡崎店",
+          "restologo": "https://raw.githubusercontent.com/david3080/auth/master/images/gusto.png"
         },
         {
           "_id": 2,
@@ -182,7 +183,8 @@ const String initRestoString = '''
           "uid": 2,
           "username": "北島三郎",
           "userphotourl": "https://cdn.asagei.com/asagei/uploads/2016/08/20160810kitajima.jpg",
-          "restoname": "ガスト東岡崎店"
+          "restoname": "ガスト東岡崎店",
+          "restologo": "https://raw.githubusercontent.com/david3080/auth/master/images/gusto.png"
         }
       ]
     },
