@@ -19,7 +19,7 @@ class Resto {
   });
   final String id;
   final String name;
-  final String type;
+  final List<String> type;
   final String address;
   final String logo;
   final double star;
@@ -36,16 +36,14 @@ class Resto {
       return null;
     }
     final String name = data['name']??""; // @requiredなのでnull値でなく空白""をセット
-    final String type = data['type'];
+
+    // 配列はdynamicで受けて型変換する
+    final List<dynamic> _type = data['type'];
+    List<String> type = _type.map((type) => type.toString()).toList();
+
     final String address = data['address'];
     final String logo = data['logo'];
-    double star;
-    if(data['star'] is int) { // マップ上の値がintならdoubleに変換してセット
-      int star0 = data['star'];
-      star = star0.toDouble();
-    } else {
-      star = data['star']??0.0;
-    }
+    final double star = data['star']??0.0;
     final int reviewCount = data['reviewCount']??0;
     final int totalStarCount = data['totalStarCount']??0;
     return Resto(
@@ -74,7 +72,7 @@ class Resto {
   }
 
   Resto copy(
-      {String id,String name,String type,String address,String logo,double star,int reviewCount,int totalStarCount,}) {
+      {String id,String name,List<String> type,String address,String logo,double star,int reviewCount,int totalStarCount,}) {
     return Resto(
       id: id != null ? id : this.id,
       name: name != null ? name: this.name,
@@ -152,13 +150,15 @@ const String initRestoString = '''
     {
       "_id": 0,
       "name": "ガスト東岡崎店",
-      "type": "洋食",
+      "type": ["洋食"],
       "address": "愛知県岡崎市大西１丁目１−１０",
       "logo": "https://raw.githubusercontent.com/david3080/auth/master/images/gusto.png",
+      "star": 3.0,
       "reviews": [
         {
           "_id": 0,
           "star": 2,
+          "starList": [2],
           "comment": "値段の割に合わない気がする。チーズハンバーグを頼んだが、レトルトな感じでした。さらに、スープセットにしたが、スープは一種類。これなら、ステーキ宮のスープセット(4種類のスープが選びたい放題)の方がより楽しめると思う。ガストより少しお値段上がりますが。",
           "uid": 0,
           "username": "鈴木一郎",
@@ -169,6 +169,7 @@ const String initRestoString = '''
         {
           "_id": 1,
           "star": 3,
+          "starList": [3],
           "comment": "タブレットによる注文に変わったが、慣れが必要。メニューを広げて、料理を比べたい。この方式で価格が下がればよいが、、、",
           "uid": 1,
           "username": "佐藤二郎",
@@ -178,7 +179,8 @@ const String initRestoString = '''
         },
         {
           "_id": 2,
-          "star": 5,
+          "star": 4,
+          "starList": [4],
           "comment": "ドリンクバーが99円(単品で注文してもOK).パソコンの持ち込みOK.コンセントで充電できる.持ち帰り容器は無料.食べきれない料理の持ち帰りOK.トイレは新しくてキレイ",
           "uid": 2,
           "username": "北島三郎",
@@ -191,7 +193,7 @@ const String initRestoString = '''
     {
       "_id": 1,
       "name": "デニーズ東岡崎店",
-      "type": "洋食",
+      "type": ["洋食"],
       "address": "愛知県岡崎市美合町 字五反田２５－１",
       "logo": "https://sozainavi.com/wp-content/uploads/2019/10/dennys.jpg",
       "star": 0.0
@@ -199,7 +201,7 @@ const String initRestoString = '''
     {
       "_id": 2,
       "name": "大戸屋ごはん処岡崎店",
-      "type": "和食",
+      "type": ["和食"],
       "address": "愛知県岡崎市井田西町１−１１",
       "logo": "https://sozainavi.com/wp-content/uploads/2019/10/ootoya.jpg",
       "star": 0.0
@@ -207,7 +209,7 @@ const String initRestoString = '''
     {
       "_id": 3,
       "name": "和食さと岡崎店",
-      "type": "和食",
+      "type": ["和食"],
       "address": "愛知県岡崎市上里２丁目１−１",
       "logo": "https://sato-res.com/assets/tile/sato.png",
       "star": 0.0
@@ -215,7 +217,7 @@ const String initRestoString = '''
     {
       "_id": 4,
       "name": "カレーハウスCoCo壱番屋岡崎上地店",
-      "type": "カレー",
+      "type": ["カレー"],
       "address": "愛知県岡崎市上地３丁目５１−６",
       "logo": "https://www.ichibanya.co.jp/assets/images/common/ogp.png",
       "star": 0.0
@@ -223,7 +225,7 @@ const String initRestoString = '''
     {
       "_id": 5,
       "name": "スシロー岡崎上和田店",
-      "type": "寿司",
+      "type": ["寿司"],
       "address": "愛知県岡崎市天白町東池１５−１",
       "logo": "https://www.akindo-sushiro.co.jp/shared/images/ogp.png",
       "star": 0.0
@@ -231,7 +233,7 @@ const String initRestoString = '''
     {
       "_id": 6,
       "name": "くら寿司北岡崎店",
-      "type": "寿司",
+      "type": ["寿司"],
       "address": "愛知県岡崎市錦町２−１２",
       "logo": "https://www.watch.impress.co.jp/img/ipw/docs/1230/499/kura1_s.jpg",
       "star": 0.0
@@ -239,7 +241,7 @@ const String initRestoString = '''
     {
       "_id": 7,
       "name": "モスバーガー岡崎大西店",
-      "type": "ハンバーガー",
+      "type": ["ハンバーガー"],
       "address": "愛知県岡崎市大西１丁目１６−７",
       "logo": "http://www.wing-net.ne.jp/image/kamiooka/store/storage/w250/mos.png",
       "star": 0.0
@@ -247,7 +249,7 @@ const String initRestoString = '''
     {
       "_id": 8,
       "name": "マクドナルド岡崎インター店",
-      "type": "ハンバーガー",
+      "type": ["ハンバーガー"],
       "address": "愛知県岡崎市大平町石丸６０−１",
       "logo": "https://sozainavi.com/wp-content/uploads/2019/10/mcdonalds.png",
       "star": 0.0
@@ -255,7 +257,7 @@ const String initRestoString = '''
     {
       "_id": 9,
       "name": "かつや愛知岡崎インター店",
-      "type": "とんかつ",
+      "type": ["とんかつ"],
       "address": "愛知県岡崎市大平町新寺25",
       "logo": "https://raw.githubusercontent.com/david3080/auth/master/images/katsuya.png",
       "star": 0.0

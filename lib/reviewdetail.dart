@@ -279,7 +279,7 @@ class ReviewEdit extends StatelessWidget {
                     child: Icon(Icons.save_alt,size:20.0,color:Colors.white),
                     onTap: () {
                       Review.setReview(
-                        review.copy(star:star.toDouble(),comment:cmtCtrl.text,),
+                        review.copy(star:star,comment:cmtCtrl.text,),
                         review.star,
                       );
                       Navigator.of(context).pop(); // レビュー詳細に戻る
