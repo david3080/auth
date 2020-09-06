@@ -17,150 +17,160 @@ class _ReviewDetailState extends State<ReviewDetail> {
   Widget build(BuildContext context) {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
-    return Scaffold(
-      body: Stack(
-        children: <Widget>[
-          Container(
-            height: screenHeight,
-            width: screenWidth,
-            color: Colors.transparent
-          ),
-          Container(
-            height: screenHeight / 2,
-            width: screenWidth,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: NetworkImage(widget.review.restologo),
-                fit: BoxFit.cover
-              )
-            )
-          ),
-          Positioned(
-            top: screenHeight/2,
-            child: Container(
-              padding: EdgeInsets.only(left:20.0,right:20.0),
-              height: screenHeight / 2,
-              width: screenWidth,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 1,
-                    child: Row(
-                      children: <Widget>[
-                        StarRating(
-                          rating: widget.review.star.toDouble(),
-                          size: 30.0,
+    return FutureBuilder(
+      future: Review.restoColRef.doc(widget.review.restoid).collection("reviews").doc(widget.review.id).get(),
+      builder: (context, snapshot) {
+        if(snapshot.hasData) {
+          Review review = Review.fromMap(snapshot.data.id, snapshot.data.data());
+          return Scaffold(
+            body: Stack(
+              children: <Widget>[
+                Container(
+                  height: screenHeight,
+                  width: screenWidth,
+                  color: Colors.transparent
+                ),
+                Container(
+                  height: screenHeight / 2,
+                  width: screenWidth,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(review.restologo),
+                      fit: BoxFit.cover
+                    )
+                  )
+                ),
+                Positioned(
+                  top: screenHeight/2,
+                  child: Container(
+                    padding: EdgeInsets.only(left:20.0,right:20.0),
+                    height: screenHeight / 2,
+                    width: screenWidth,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 1,
+                          child: Row(
+                            children: <Widget>[
+                              StarRating(
+                                rating: review.star.toDouble(),
+                                size: 30.0,
+                              ),
+                              SizedBox(width: 10.0),
+                              Text(review.star.toString(),
+                                style: TextStyle(
+                                  fontSize: 30.0,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black,
+                                )
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(width: 10.0),
-                        Text(widget.review.star.toString(),
-                          style: TextStyle(
-                            fontSize: 30.0,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.black,
-                          )
+                        Expanded(
+                          flex: 6,
+                          child: Container(
+                            child: Text(
+                              review.comment,
+                              maxLines: 10,
+                              style: TextStyle(
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.black
+                              ),
+                              strutStyle: StrutStyle(
+                                fontSize: 14.0,
+                                height: 1.2
+                              ),
+                            ),
+                          ),
                         ),
-                      ],
+                      ]
                     ),
-                  ),
-                  Expanded(
-                    flex: 6,
+                  )
+                ),
+                Align( // レビューリストに戻る
+                  alignment: Alignment.topLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 15.0, top: 30.0),
                     child: Container(
-                      child: Text(
-                        widget.review.comment,
-                        maxLines: 10,
-                        style: TextStyle(
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black
-                        ),
-                        strutStyle: StrutStyle(
-                          fontSize: 14.0,
-                          height: 1.2
-                        ),
+                      height: 40.0,
+                      width: 40.0,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.grey,
                       ),
-                    ),
-                  ),
-                ]
-              ),
-            )
-          ),
-          Align( // レビューリストに戻る
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: EdgeInsets.only(left: 15.0, top: 30.0),
-              child: Container(
-                height: 40.0,
-                width: 40.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey,
-                ),
-                child: Center(
-                  child: InkWell(
-                    child: Icon(Icons.arrow_back,size:20.0,color:Colors.white),
-                    onTap: () => Navigator.of(context).pop<bool>(false), // 戻っても画面リロードしない
-                  )
-                )
-              )
-            )
-          ),
-          Align(
-            alignment: Alignment.topRight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                // レビューを削除する
-                Padding(
-                  padding: EdgeInsets.only(right: 15.0, top: 30.0),
-                  child: Container(
-                    height: 40.0,
-                    width: 40.0,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey,
-                    ),
-                    child: Center(
-                      child: InkWell(
-                        child: Icon(Icons.delete,size:20.0,color:Colors.white),
-                        onTap: () {
-                          Review.deleteReview(widget.review).then(
-                            (_) => Navigator.of(context).pop<bool>(true), // 戻ったら画面をリロードする
-                          );
-                        },
-                      ),
+                      child: Center(
+                        child: InkWell(
+                          child: Icon(Icons.arrow_back,size:20.0,color:Colors.white),
+                          onTap: () => Navigator.of(context).pop<bool>(true), // レビュー編集の後かもしれないので戻ったら画面リロード
+                        )
+                      )
                     )
                   )
                 ),
-                // レビューを編集に切り替える
-                Padding(
-                  padding: EdgeInsets.only(right: 15.0, top: 30.0),
-                  child: Container(
-                    height: 40.0,
-                    width: 40.0,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey,
-                    ),
-                    child: Center(
-                      child: InkWell(
-                        child: Icon(Icons.edit,size:20.0,color:Colors.white),
-                        onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => ReviewEdit(review:widget.review))
-                          ).then((reload) {
-                            if(reload) setState((){}); // 画面リロード
-                          });
-                        },
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      // レビューを削除する
+                      Padding(
+                        padding: EdgeInsets.only(right: 15.0, top: 30.0),
+                        child: Container(
+                          height: 40.0,
+                          width: 40.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey,
+                          ),
+                          child: Center(
+                            child: InkWell(
+                              child: Icon(Icons.delete,size:20.0,color:Colors.white),
+                              onTap: () {
+                                Review.deleteReview(review).then(
+                                  (_) => Navigator.of(context).pop<bool>(true), // 戻ったら画面をリロードする
+                                );
+                              },
+                            ),
+                          )
+                        )
                       ),
-                    )
+                      // レビューを編集に切り替える
+                      Padding(
+                        padding: EdgeInsets.only(right: 15.0, top: 30.0),
+                        child: Container(
+                          height: 40.0,
+                          width: 40.0,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey,
+                          ),
+                          child: Center(
+                            child: InkWell(
+                              child: Icon(Icons.edit,size:20.0,color:Colors.white),
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => ReviewEdit(review:review))
+                                ).then((reload) {
+                                  if(reload) setState((){}); // 画面リロード
+                                });
+                              },
+                            ),
+                          )
+                        )
+                      ),
+                    ],
                   )
                 ),
               ],
             )
-          ),
-        ],
-      )
+          );
+        } else {
+          return Container(child: Center(child: CircularProgressIndicator()));
+        }
+      }
     );
   }
 }
@@ -288,8 +298,8 @@ class ReviewEdit extends StatelessWidget {
                         review.copy(star:star,comment:cmtCtrl.text,),
                         review.star,
                       ).then(
-                        (_) => Navigator.of(context).pop<bool>(true), // 戻ったら画面をリロードする
-                      ); // レビュー詳細に戻る
+                        (_) => Navigator.of(context).pop<bool>(true), // レビュー詳細に戻ったら画面をリロードする
+                      );
                     },
                   )
                 )

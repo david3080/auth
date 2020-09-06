@@ -1,9 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-final restoColRef = FirebaseFirestore.instance.collection("restos");
-final reviewColGrpRef =
-    FirebaseFirestore.instance.collectionGroup("reviews"); // コレクショングループ
-
 class Review {
   Review({
     this.id,
@@ -93,6 +89,10 @@ class Review {
       restologo: restologo != null ? restologo : this.restologo,
     );
   }
+
+  static var restoColRef = FirebaseFirestore.instance.collection("restos");
+  static var reviewColGrpRef =
+    FirebaseFirestore.instance.collectionGroup("reviews"); // コレクショングループ
 
   // 星数リスト（0から5まで）
   static List<int> starSelectList = [0, 1, 2, 3, 4, 5];
