@@ -4,7 +4,14 @@ Flutter WebでFirebase AuthとFirestoreを利用してemailログインするサ
 (FirestorageはFlutter Webにまだ対応してないため、アバターの画像は実装していません)
 さらにレストランにレビューを行う
 
-Flutter Webのサンプルサイトは[こちら](https://firestore-5643d.web.app)。
+Flutter Webのサンプルサイトは[こちら](https://firestore-5643d.web.app)からアクセスできます。
+
+## 参考サイト
+
+本アプリケーションの開発方法の詳細は[こちら](https://david3080.github.io/firestore/)で解説しています。
+
+## 使い方
+- レビュー
 
 ## 使い方
 
@@ -71,8 +78,6 @@ Flutter Webのサンプルサイトは[こちら](https://firestore-5643d.web.ap
 - saburo@test.com
 
 7. Flutter Webでテスト実行する.
-
-```
-# flutter run -d chrome
-```
-
+  ```
+  # flutter run -d chrome
+  ```
