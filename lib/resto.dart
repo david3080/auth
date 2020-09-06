@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-final restoColRef = FirebaseFirestore.instance.collection("restos");
-final userColRef = FirebaseFirestore.instance.collection("users");
+import 'review.dart';
 
 class Resto {
   Resto({
@@ -13,9 +12,9 @@ class Resto {
     this.type,
     this.address,
     this.logo,
-    this.star = 0.0,
-    this.reviewCount = 0,
-    this.totalStarCount = 0,
+    this.star = 0.0, // 設定がない場合の初期値
+    this.reviewCount = 0, // 設定がない場合の初期値
+    this.totalStarCount = 0, // 設定がない場合の初期値
   });
   final String id;
   final String name;
@@ -25,6 +24,19 @@ class Resto {
   final double star;
   final int reviewCount;
   final int totalStarCount;
+
+  static var restoColRef = FirebaseFirestore.instance.collection("restos");
+  static var userColRef = FirebaseFirestore.instance.collection("users");
+
+  // 食事タイプリスト
+  static List<String> restoTypes = [
+    '洋食',
+    '和食',
+    'カレー',
+    '寿司',
+    'ハンバーガー',
+    'とんかつ',
+  ];
 
   @override
   String toString() {
@@ -116,8 +128,8 @@ class Resto {
                   _review["restoname"] = resto.name;
                   _review["restologo"] = resto.logo;
                   DocumentReference _reviewDocRef = _restoDocRef.collection("reviews").doc();
-                  _review["id"] = _reviewDocRef.id;
-                  _reviewDocRef.set(_review);
+                  Review _newReview = Review.fromMap(_reviewDocRef.id, _review);
+                  _reviewDocRef.set(_newReview.toMap());
                 });
               });
               // レストランの平均星数を計算
@@ -158,18 +170,16 @@ const String initRestoString = '''
         {
           "_id": 0,
           "star": 2,
-          "starList": [2],
           "comment": "値段の割に合わない気がする。チーズハンバーグを頼んだが、レトルトな感じでした。さらに、スープセットにしたが、スープは一種類。これなら、ステーキ宮のスープセット(4種類のスープが選びたい放題)の方がより楽しめると思う。ガストより少しお値段上がりますが。",
           "uid": 0,
           "username": "鈴木一郎",
-          "userphotourl": "https://meikyu-kai.org/wp-content/uploads/2020/01/51_Ichiro.jpg",
+          "userphotourl": "https://meikyu-kai.org/wp-content/uploads/2020/06/51_Ichiro.jpg",
           "restoname": "ガスト東岡崎店",
           "restologo": "https://raw.githubusercontent.com/david3080/auth/master/images/gusto.png"
         },
         {
           "_id": 1,
           "star": 3,
-          "starList": [3],
           "comment": "タブレットによる注文に変わったが、慣れが必要。メニューを広げて、料理を比べたい。この方式で価格が下がればよいが、、、",
           "uid": 1,
           "username": "佐藤二郎",
@@ -180,7 +190,6 @@ const String initRestoString = '''
         {
           "_id": 2,
           "star": 4,
-          "starList": [4],
           "comment": "ドリンクバーが99円(単品で注文してもOK).パソコンの持ち込みOK.コンセントで充電できる.持ち帰り容器は無料.食べきれない料理の持ち帰りOK.トイレは新しくてキレイ",
           "uid": 2,
           "username": "北島三郎",

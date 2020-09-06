@@ -7,8 +7,7 @@ final reviewColGrpRef =
 class Review {
   Review({
     this.id,
-    this.star,
-    this.starList,
+    this.star = 0, // 設定がない場合の初期値
     this.comment,
     this.uid,
     this.username,
@@ -19,7 +18,6 @@ class Review {
   });
   final String id;
   final int star;
-  final List<int> starList;
   final String comment;
   final String uid;
   final String username;
@@ -37,12 +35,7 @@ class Review {
     if (data == null) {
       return null;
     }
-    final int star = data['star'];
-
-    // 配列はdynamicで受けて型変換する
-    final List<dynamic> _starList = data['starList'];
-    List<int> starList = _starList.map((star) => star is int ? star : 0).toList();
-    
+    final int star = data['star'];    
     final String comment = data['comment'];
     final String uid = data['uid'];
     final String username = data['username'];
@@ -53,7 +46,6 @@ class Review {
     return Review(
       id: documentId,
       star: star,
-      starList: starList,
       comment: comment,
       uid: uid,
       username: username,
@@ -68,7 +60,6 @@ class Review {
     return {
       "id": id,
       "star": star,
-      "starList": starList,
       "comment": comment,
       "uid": uid,
       "username": username,
@@ -82,7 +73,6 @@ class Review {
   Review copy({
     String id,
     int star,
-    List<int> starList,
     String comment,
     String uid,
     String username,
@@ -94,7 +84,6 @@ class Review {
     return Review(
       id: id != null ? id : this.id,
       star: star != null ? star : this.star,
-      starList: starList != null ? starList : this.starList,
       comment: comment != null ? comment : this.comment,
       uid: uid != null ? uid : this.uid,
       username: username != null ? username : this.username,
@@ -104,6 +93,9 @@ class Review {
       restologo: restologo != null ? restologo : this.restologo,
     );
   }
+
+  // 星数リスト（0から5まで）
+  static List<int> starSelectList = [0, 1, 2, 3, 4, 5];
 
   // レストランを特定してそのレビューをリストします
   static Stream<List<Review>> getRestoReviwsStream(String restoId) {
@@ -118,16 +110,21 @@ class Review {
     });
   }
 
-  // レビューはコレクショングループが有効になっているので全レビューをリストします
-  static Stream<List<Review>> getReviwsStream() {
-    return reviewColGrpRef.snapshots().map((snapshot) {
+  // 全レビューをリストします。
+  // レビューは単一フィールドインデックスでid,star,uid(昇降順スコープ)を除外して
+  // コレクショングループを有効にしており、ここではstarを指定して対象のレビューをリストします
+  static Stream<List<Review>> getReviwsStream(List<int> stars) {
+    if(stars.length == 0) stars.add(-1); // 検索対象星数の設定がない場合、値としてありえない-1をセット
+    return reviewColGrpRef.where("star",whereIn:stars).snapshots().map((snapshot) {
       return snapshot.docs.map((snapshot) {
         return Review.fromMap(snapshot.id, snapshot.data());
       }).toList();
     });
   }
 
-  // ユーザIDを指定してその人の全レビューをリストします
+  // ユーザIDを指定してその人の全レビューをリストします。
+  // レビューは単一フィールドインデックスでid,star,uid(昇降順スコープ)を除外して
+  // コレクショングループを有効にしており、ここではuidを指定して全レビューをリストします
   static Stream<List<Review>> getUserReviwsStream(String uid) {
     return reviewColGrpRef
         .where("uid", isEqualTo: uid)
@@ -143,19 +140,9 @@ class Review {
   static Future<void> setReview(Review review, int oldStar) async {
     // レストランのドキュメントリファレンスを取得
     DocumentReference _restoDocRef = restoColRef.doc(review.restoid);
-
-    // 星数の配列を初期化
-    List<int> _starList = [];
-    _starList.add(review.star);
-
-    if (review.id == null) {
-      // 追加の場合
-      Review _newReview = review.copy(
-        id: _restoDocRef.collection("reviews").doc().id, // 新規レビューなのでIDを取得
-        starList: _starList,
-      );
-      await _restoDocRef.collection("reviews").doc().set(_newReview.toMap()); // 新規レビューの書き込み
-
+    if (review.id == null) { // 追加の場合
+      // 新規レビューなのでIDを取得してから書き込み
+      await _restoDocRef.collection("reviews").doc().set(review.copy(id:_restoDocRef.collection("reviews").doc().id).toMap());
       // レストランの星数を更新
       await _restoDocRef.get().then((snapshot) async {
         // 星数の平均を計算しなおしてセット
@@ -170,13 +157,9 @@ class Review {
         restoMap["star"] = restoMap["totalStarCount"] / restoMap["reviewCount"];
         await _restoDocRef.update(restoMap);
       });
-    } else {
-      // 更新の場合
-      Review _newReview = review.copy(
-        starList: _starList,
-      );
-      await _restoDocRef.collection("reviews").doc(review.id).set(_newReview.toMap(),SetOptions(merge:true)); // レビュー更新
-
+    } else { // 更新の場合
+      // レビュー更新
+      await _restoDocRef.collection("reviews").doc(review.id).set(review.toMap(),SetOptions(merge:true));
       // レストランの星数を更新
       await _restoDocRef.get().then((snapshot) async {
         // 星数の平均を計算しなおしてセット

@@ -16,6 +16,7 @@ dependencies:
   image_picker: ^0.6.7+4
 
   # Flutter Webで利用可能
+  provider: ^4.3.2+1
   responsive_grid: ^1.2.0
   smooth_star_rating: ^1.1.1
   openid_client: ^0.3.0

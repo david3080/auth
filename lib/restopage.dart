@@ -14,7 +14,12 @@ import 'user.dart';
 const double _minSpacingPx = 16;
 const double _cardWidth = 360;
 
-class RestoPage extends StatelessWidget {
+class RestoPage extends StatefulWidget {
+  @override
+  _RestoPageState createState() => _RestoPageState();
+}
+
+class _RestoPageState extends State<RestoPage> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Resto>>(
@@ -35,14 +40,48 @@ class RestoPage extends StatelessWidget {
                   desiredItemWidth: math.min(_cardWidth,
                       MediaQuery.of(context).size.width - (2 * _minSpacingPx)),
                   minSpacing: _minSpacingPx,
-                  children: restos
-                      .map((resto) =>
-                          RestoCard(resto: resto))
-                      .toList(),
+                  children: restos.map((resto) {
+                    return Card(
+                      child: InkWell(
+                        onTap:()=>Navigator.of(context).push(
+                          MaterialPageRoute(builder:(context)=>RestoDetail(resto:resto)),
+                        ).then((_) => setState((){})), // レストラン詳細画面から戻ったら画面リロード
+                        splashColor: Colors.blue.withAlpha(30),
+                        child: Container(
+                          height: 250,
+                          child: Column(
+                            children: <Widget>[
+                              Expanded(
+                                child: Container(
+                                  alignment: Alignment.centerLeft,
+                                  decoration: BoxDecoration(
+                                    image: DecorationImage(image: NetworkImage(resto.logo),fit: BoxFit.cover)
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                alignment: Alignment.centerLeft,
+                                padding: EdgeInsets.all(8),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Text(resto.name,style: Theme.of(context).textTheme.subtitle2),
+                                    StarRating(rating: resto.star),
+                                    Text('${resto.type} ${resto.address}',style:Theme.of(context).textTheme.caption),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                 ),
               );
             } else {
-              return Container(child: Center(child: Text("Empty...")));
+              return Container(child: Center(child: Text("該当するレストランはありません。")));
             }
           } else {
             return Container(child: Center(child: CircularProgressIndicator()));
@@ -51,87 +90,12 @@ class RestoPage extends StatelessWidget {
   }
 }
 
-class RestoCard extends StatelessWidget {
-  RestoCard({
-    @required this.resto,
-  });
-  Resto resto;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (context) => RestoDetail(
-              resto: resto,
-            ),
-          ));
-        },
-        splashColor: Colors.blue.withAlpha(30),
-        child: Container(
-          height: 250,
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: Container(
-                    alignment: Alignment.centerLeft,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(resto.logo),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    child: null),
-              ),
-              Padding(
-                padding: EdgeInsets.all(8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(
-                            resto.name,
-                            style: Theme.of(context).textTheme.subtitle2,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      padding: EdgeInsets.fromLTRB(0, (kIsWeb ? 0 : 2), 0, 4),
-                      alignment: Alignment.bottomLeft,
-                      child: StarRating(
-                        rating: resto.star,
-                      ),
-                    ),
-                    Container(
-                      alignment: Alignment.bottomLeft,
-                      child: Text(
-                        '${resto.type} ● ${resto.address}',
-                        style: Theme.of(context).textTheme.caption,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
+// ユーザコレクション参照
 final userColRef = FirebaseFirestore.instance.collection("users");
 
+// レストラン詳細画面
 class RestoDetail extends StatefulWidget {
-  RestoDetail({
-    @required this.resto,
-  });
+  RestoDetail({@required this.resto});
   final Resto resto;
 
   @override
@@ -146,18 +110,17 @@ class _RestoDetailState extends State<RestoDetail> {
     var screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Stack(children: <Widget>[
+        // 全体の背景
+        Container(height:screenHeight,width:screenWidth,color:Colors.transparent),
+        // 上半分はお店のロゴ
         Container(
-            // 全体の背景
-            height: screenHeight,
-            width: screenWidth,
-            color: Colors.transparent),
-        Container(
-            // 上半分はお店のロゴ
             height: screenHeight / 2,
             width: screenWidth,
             decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: NetworkImage(widget.resto.logo), fit: BoxFit.cover))),
+              image: DecorationImage(
+                image: NetworkImage(widget.resto.logo), fit: BoxFit.cover),
+              ),
+            ),
         Align(
             // 画面左上は戻るボタン
             alignment: Alignment.topLeft,
@@ -194,7 +157,9 @@ class _RestoDetailState extends State<RestoDetail> {
                   );
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => ReviewEdit(review:review)),
-                  ).then((_) => setState((){})); // 画面をリロードする
+                  ).then((reload) {
+                    if(reload) setState((){}); // 画面リロード
+                  });
                 });
               },
               child: Container(
@@ -211,81 +176,106 @@ class _RestoDetailState extends State<RestoDetail> {
         Positioned(
           // 下半分はお店情報とレビューリスト
           top: screenHeight / 2,
-          child: Container(
-            padding: EdgeInsets.only(left: 20.0),
-            width: screenWidth,
-            height: screenHeight / 2,
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              SizedBox(height: 5.0),
-              // レストラン名
-              Text(
-                  widget.resto.name,
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black,
-                  )),
-              SizedBox(height: 3.0),
-              Row(
-                children: <Widget>[
-                  // レストランの平均星数とレビュー人数
-                  StarRating(
-                    rating: widget.resto.star,
-                    size: 15.0,
-                  ),
-                  SizedBox(width: 3.0),
-                  Text(widget.resto.star.toStringAsFixed(2),
-                      style: TextStyle(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.black,
-                      )),
-                  SizedBox(width: 3.0),
-                  Text('(${widget.resto.reviewCount} Reviews)',
-                      style: TextStyle(
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.grey,
-                      ))
-                ],
-              ),
-              SizedBox(height: 5.0),
-              Flexible(
-                // レビューリスト
-                child: StreamBuilder<List<Review>>(
-                    stream: Review.getRestoReviwsStream(widget.resto.id),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        final List<Review> reviews = snapshot.data;
-                        if (reviews.isNotEmpty) {
-                          return ListView.builder(
-                              itemCount: reviews.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                return InkWell(
-                                  onTap: () {
-                                    Navigator.of(context)
-                                        .push(MaterialPageRoute(
-                                      builder: (context) => UserReviewDetail(
+          child: FutureBuilder(
+            future: Resto.restoColRef.doc(widget.resto.id).get(),
+            builder: (context, snapshot) {
+              if(snapshot.hasData) {
+                Resto resto = Resto.fromMap(snapshot.data.id, snapshot.data.data());
+                return Container(
+                  padding: EdgeInsets.only(left: 20.0),
+                  width: screenWidth,
+                  height: screenHeight / 2,
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    SizedBox(height:5),
+                    // レストラン名
+                    Text(resto.name,style:TextStyle(fontSize:18,fontWeight:FontWeight.w900)),
+                    SizedBox(height:3),
+                    Row(
+                      children: <Widget>[
+                        // レストランの平均星数とレビュー人数
+                        StarRating(rating:resto.star,size:15.0),
+                        SizedBox(width: 3.0),
+                        Text(resto.star.toStringAsFixed(2),style:TextStyle(fontSize:14,fontWeight:FontWeight.w400)),
+                        SizedBox(width: 3.0),
+                        Text('(${resto.reviewCount}個のレビュー)',style:TextStyle(fontSize:14,fontWeight:FontWeight.w400)),
+                      ]
+                    ),
+                    SizedBox(height: 5.0),
+                    Flexible(
+                      // レビューリスト
+                      child: StreamBuilder<List<Review>>(
+                        stream: Review.getRestoReviwsStream(resto.id),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final List<Review> reviews = snapshot.data;
+                            if (reviews.isNotEmpty) {
+                              return ListView.builder(
+                                itemCount: reviews.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  return InkWell(
+                                    onTap: () {
+                                      Navigator.of(context).push(MaterialPageRoute(
+                                        builder: (context) => UserReviewDetail(
                                           review: reviews[index]),
-                                    ));
-                                  },
-                                  child: UserReviewListTile(review:reviews[index],),
-                                );
-                              });
-                        } else {
-                          return Container(
-                              child: Center(child: Text("Empty...")));
-                        }
-                      } else {
-                        return Container(
-                            child: Center(child: CircularProgressIndicator()));
-                      }
-                    }),
-              )
-            ]),
+                                      ));
+                                    },
+                                    child: UserReviewListTile(review:reviews[index],),
+                                  );
+                                },
+                              );
+                            } else {
+                              return Container(child: Center(child: Text("該当のレビューはありません。")));
+                            }
+                          } else {
+                            return Container(child: Center(child: CircularProgressIndicator()));
+                          }
+                        },
+                      ),
+                    )
+                  ]),
+                );
+              } else {
+                return Container(child: Center(child: CircularProgressIndicator()));
+              }
+            }
           ),
         ),
       ]),
+    );
+  }
+}
+
+// ユーザ画像を表示するタイル
+class UserReviewListTile extends StatelessWidget {
+  UserReviewListTile({@required this.review});
+  final Review review;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Hero(
+        tag: review.id,
+        child: Container(
+          height: 50,
+          width: 50,
+          decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(review.userphotourl),
+                fit: BoxFit.cover,
+              ),
+              borderRadius: BorderRadius.circular(5.0)),
+        ),
+      ),
+      title: StarRating(
+        rating: review.star.toDouble(),
+      ),
+      subtitle: Text(
+        review.comment,
+        style: TextStyle(fontSize: 10),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      ),
+      trailing: Icon(Icons.keyboard_arrow_right),
     );
   }
 }

@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 
 import 'review.dart';
 import 'reviewdetail.dart';
-import 'reviewpage.dart';
+import 'starrating.dart';
 import 'user.dart';
 
 class AccountPage extends StatefulWidget {
@@ -21,36 +21,22 @@ class _AccountPageState extends State<AccountPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(
-          "アカウント",
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
+        title: Text("アカウント",style:TextStyle(fontSize:20,color:Colors.white)),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.exit_to_app),
-            onPressed: () => User.logout(context),
-          ),
+          IconButton(icon: Icon(Icons.exit_to_app),onPressed:()=>User.logout(context)), // ログアウト
         ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(300),
-          child: StreamBuilder<User>(
+          child: StreamBuilder<User> (
             stream: User.getUserStream(authUser.uid),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.active && snapshot.hasData) {
                 final user = snapshot.data;
                 nameController.text = user.name;
                 return Column(
-                  children: <Widget>[
-                    Avatar(
-                      url: user?.url,
-                      radius: 70,
-                      borderColor: Colors.black54,
-                      borderWidth: 2.0,
-                      onPressed: () => _chooseAvatar(context, user),
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
+                  children: <Widget> [
+                    Avatar(url: user?.url,onPressed:()=>_chooseAvatar(context, user)),
+                    SizedBox(height: 10),
                     Container(
                       padding: EdgeInsets.all(20),
                       child: Center(
@@ -58,17 +44,13 @@ class _AccountPageState extends State<AccountPage> {
                           style: TextStyle(color: Colors.white),
                           controller: nameController,
                           onEditingComplete: () async {
-                            User _newUser = user.copy(
-                              name: nameController.text,
-                            );
+                            User _newUser = user.copy(name: nameController.text);
                             await _newUser.setUser();
                           },
                           decoration: InputDecoration(
                             labelText: "名前",
                             labelStyle: TextStyle(color: Colors.white),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(20.0)),
                           ),
                         ),
                       ),
@@ -95,14 +77,16 @@ class _AccountPageState extends State<AccountPage> {
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => ReviewDetail(review:reviews[index]))
-                      ).then((_) => setState((){})); // 画面をリロードする
+                      ).then((reload) {
+                        if(reload) setState((){}); // 画面リロード
+                      });
                     },
                     child: RestoReviewListTile(review:reviews[index]),
                   );
                 }
               );
             } else {
-              return Container(child: Center(child: Text("Empty...")));
+              return Container(child: Center(child: Text("該当のレビューはありません。")));
             }
           } else {
             return Container(child: Center(child: CircularProgressIndicator()));
@@ -121,9 +105,9 @@ class _AccountPageState extends State<AccountPage> {
 class Avatar extends StatelessWidget {
   const Avatar({
     @required this.url,
-    @required this.radius,
-    this.borderColor,
-    this.borderWidth,
+    this.radius = 70,
+    this.borderColor = Colors.black54,
+    this.borderWidth = 2,
     this.onPressed,
   });
   final String url;
@@ -159,5 +143,37 @@ class Avatar extends StatelessWidget {
       );
     }
     return null;
+  }
+}
+
+// レストラン画像を表示するタイル
+class RestoReviewListTile extends StatelessWidget {
+  RestoReviewListTile({@required this.review});
+  final Review review;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: Container(
+        height: 50,
+        width: 50,
+        decoration: BoxDecoration(
+            image: DecorationImage(
+              image: NetworkImage(review.restologo),
+              fit: BoxFit.cover,
+            ),
+            borderRadius: BorderRadius.circular(5.0)),
+      ),
+      title: StarRating(
+        rating: review.star.toDouble(),
+      ),
+      subtitle: Text(
+        review.comment,
+        style: TextStyle(fontSize: 10),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+      ),
+      trailing: Icon(Icons.keyboard_arrow_right),
+    );
   }
 }

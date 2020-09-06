@@ -135,13 +135,13 @@ class User {
       "_id": 0,
       "name": "鈴木一郎",
       "email": "ichiro@test.com",
-      "url": "https://meikyu-kai.org/wp-content/uploads/2020/01/51_Ichiro.jpg"
+      "url": "https://meikyukai.jp/wp-content/uploads/2020/06/51_ichiro.jpg"
     },
     {
       "_id": 1,
       "name": "佐藤二郎",
       "email": "jiro@test.com",
-      "url": "http://www.from1-pro.jp/images/t_10/img_l.jpg?1597426029"
+      "url": "http://www.from1-pro.jp/images/t_10/img_l.jpg"
     },
     {
       "_id": 2,

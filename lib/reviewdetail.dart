@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'review.dart';
 import 'starrating.dart';
 
+// アカウント画面にリストされるレビューの詳細画面。
+// 自分のレビューが表示されるため、編集削除ができる。
 class ReviewDetail extends StatefulWidget {
   ReviewDetail({@required this.review});
   final Review review;
@@ -97,7 +99,7 @@ class _ReviewDetailState extends State<ReviewDetail> {
                 child: Center(
                   child: InkWell(
                     child: Icon(Icons.arrow_back,size:20.0,color:Colors.white),
-                    onTap: () => Navigator.of(context).pop(),
+                    onTap: () => Navigator.of(context).pop<bool>(false), // 戻っても画面リロードしない
                   )
                 )
               )
@@ -122,8 +124,9 @@ class _ReviewDetailState extends State<ReviewDetail> {
                       child: InkWell(
                         child: Icon(Icons.delete,size:20.0,color:Colors.white),
                         onTap: () {
-                          Review.deleteReview(widget.review);
-                          Navigator.of(context).pop();
+                          Review.deleteReview(widget.review).then(
+                            (_) => Navigator.of(context).pop<bool>(true), // 戻ったら画面をリロードする
+                          );
                         },
                       ),
                     )
@@ -145,7 +148,9 @@ class _ReviewDetailState extends State<ReviewDetail> {
                         onTap: () {
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => ReviewEdit(review:widget.review))
-                          ).then((_) => setState((){})); // 画面をリロードする
+                          ).then((reload) {
+                            if(reload) setState((){}); // 画面リロード
+                          });
                         },
                       ),
                     )
@@ -160,6 +165,7 @@ class _ReviewDetailState extends State<ReviewDetail> {
   }
 }
 
+// レビューの追加・編集画面。
 class ReviewEdit extends StatelessWidget {
   ReviewEdit({@required this.review});
   final Review review;
@@ -257,7 +263,7 @@ class ReviewEdit extends StatelessWidget {
                 child: Center(
                   child: InkWell(
                     child: Icon(Icons.arrow_back,size:20.0,color:Colors.white),
-                    onTap: () => Navigator.of(context).pop(),
+                    onTap: () => Navigator.of(context).pop<bool>(false), // 戻っても画面リロードしない
                   )
                 )
               )
@@ -281,8 +287,9 @@ class ReviewEdit extends StatelessWidget {
                       Review.setReview(
                         review.copy(star:star,comment:cmtCtrl.text,),
                         review.star,
-                      );
-                      Navigator.of(context).pop(); // レビュー詳細に戻る
+                      ).then(
+                        (_) => Navigator.of(context).pop<bool>(true), // 戻ったら画面をリロードする
+                      ); // レビュー詳細に戻る
                     },
                   )
                 )
@@ -295,6 +302,7 @@ class ReviewEdit extends StatelessWidget {
   }
 }
 
+// ユーザ画像を持つレビューの詳細画面。
 class UserReviewDetail extends StatelessWidget {
   UserReviewDetail({@required this.review});
   final Review review;
