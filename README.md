@@ -11,18 +11,15 @@ Flutter Webのサンプルサイトは[こちら](https://firestore-5643d.web.ap
 本アプリケーションの開発方法の詳細は[こちら](https://david3080.github.io/firestore/)で解説しています。
 
 ## 使い方
-- レビュー
 
-## 使い方
-
-1. Firebaseの初期設定
+1. Firebaseを初期設定する。
 
    - プロジェクト作成
    - コンソールでAuthenticationのメール/パスワード認証を有効化。
    - Webアプリを有効化。</>をクリックしてアプリ名をセットしてアプリを登録。
    - Firebase SDKの追加に表示される内容を3のindex.htmlの設定に利用。
 
-2. Flutterでpubspec.yamlでパッケージ追加
+2. Flutterのpubspec.yamlにパッケージを追加する。
 
   ```
   # Flutter Webで利用可能
@@ -38,16 +35,14 @@ Flutter Webのサンプルサイトは[こちら](https://firestore-5643d.web.ap
   firebase_storage: ^4.0.0
   ```
 
-3. index.htmlにJSとFlutterアプリconfigを設定
+3. index.htmlにJSとFlutterアプリconfigを設定する。
 
    下記の順番でないとエラーが発生します
-
    - Firebas関連のJSを読み込む
    - configをセットし、initializeAppする
    - main.dart.jsを読み込む
 
-
-   ```
+  ```
    <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-app.js"></script>
    <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-auth.js"></script>
    <script src="https://www.gstatic.com/firebasejs/7.17.2/firebase-firestore.js"></script>
@@ -67,17 +62,16 @@ Flutter Webのサンプルサイトは[こちら](https://firestore-5643d.web.ap
     <script src="main.dart.js" type="application/javascript"></script>
   ```
 
-4. Firebaseにプロジェクトを作成しアプリを登録すると共に、Firebaseの指示に従って設定ファイルをダウンロードしてセットする.
+4. Firestoreを有効にする。
 
-5. Firestoreを有効にする.
-
-6. Firebase Authでeメール/パスワード認証を有効にし、上に以下の3ユーザを作成する. パスワードは自由です。
+5. Firebase Authでeメール/パスワード認証を有効にし、上に以下の3ユーザを作成する. パスワードは自由です。
 
 - ichiro@test.com
 - jiro@test.com
 - saburo@test.com
 
-7. Flutter Webでテスト実行する.
+6. Flutter Webでテスト実行する。
+
   ```
   # flutter run -d chrome
   ```
