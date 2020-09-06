@@ -64,7 +64,7 @@ Flutter Webのサンプルサイトは[こちら](https://firestore-5643d.web.ap
 
 4. Firestoreを有効にする。
 
-5. Firebase Authでeメール/パスワード認証を有効にし、上に以下の3ユーザを作成する. パスワードは自由です。
+5. Authenticationのメール/パスワード認証に、以下の3ユーザを作成する。パスワードは自由です。
 
 - ichiro@test.com
 - jiro@test.com
