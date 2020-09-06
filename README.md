@@ -10,6 +10,10 @@ Flutter Webのサンプルサイトは[こちら](https://firestore-5643d.web.ap
 
 本アプリケーションの開発方法の詳細は[こちら](https://david3080.github.io/firestore/)で解説しています。
 
+## TODO
+
+- アカウント画面からレビュー編集確定後にレビュー詳細画面に戻るが編集済みデータが反映されない。
+
 ## 使い方
 
 1. Firebaseを初期設定する。
