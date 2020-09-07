@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'alert.dart';
 import 'myexception.dart';
 
-final userColRef = FirebaseFirestore.instance.collection("users");
-
 // ユーザクラス
 class User {
   User({@required this.uid,@required this.email,this.name,this.url});
@@ -17,11 +15,13 @@ class User {
   final String name;
   final String url;
 
+  // デバッグ用にユーザ情報を文字列表示する
   @override
   String toString() {
     return "uid:$uid,email:$email,name:$name,url:$url";
   }
 
+  // マップからユーザオブジェクトを作成する
   factory User.fromMap(String documentId, Map<String, dynamic> data) {
     if (data == null) {
       return null;
@@ -37,6 +37,7 @@ class User {
     );
   }
 
+  // ユーザオブジェクトからマップに変換する
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
@@ -46,6 +47,7 @@ class User {
     };
   }
 
+  // final指定されたユーザオブジェクトに値を上書きコピーして新たなユーザオブジェクトを作成する
   User copy({String name, String email, String url}) {
     return User(
       uid: uid,
@@ -55,16 +57,21 @@ class User {
     );
   }
 
+  // ユーザのコレクション参照
+  static var userColRef = FirebaseFirestore.instance.collection("users");
+
+  // データベースにユーザを追加・更新する
   Future<void> setUser({bool merge = false}) {
     return userColRef.doc(uid).set(this.toMap(),SetOptions(merge:merge));
   }
 
-  // ログインユーザからユーザを作成
+  // ログインユーザIDをもとにデータベースからユーザを取得する
   static Future<User> getUserFromAuth(auth.User _authUser) async {
     DocumentSnapshot snapshot = await userColRef.doc(_authUser.uid).get();
     return User.fromMap(snapshot.id,snapshot.data());
   }
 
+  // ログインユーザを登録する
   static Future<void> register(String email, String password, BuildContext context) async {
     await auth.FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email,
@@ -81,6 +88,7 @@ class User {
     });
   }
 
+  // ログインする
   static Future<void> login(String email, String password, BuildContext context) async {
     await auth.FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
@@ -103,6 +111,7 @@ class User {
     });
   }
 
+  // ログアウトする
   static Future<void> logout(BuildContext context) async {
     bool logout = await MyAlertDialog(
       title:"ログアウト",
@@ -114,11 +123,15 @@ class User {
     }
   }
 
+  // データベースからユーザ ストリームを取得する
   static Stream<User> getUserStream(String uid) {
     return userColRef.doc(uid).snapshots().map((snapshot)=>User.fromMap(uid,snapshot.data()));
   }
 
+  // JSON文字列から作成されるユーザマップの配列
   static List users = jsonDecode(initUserString);
+
+  // データベースにユーザコレクションがなければ初期データをセットする
   static User initUser(User user) {
     User newUser = user;
     users.forEach((_user) {

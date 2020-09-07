@@ -160,11 +160,9 @@ class RestoReviewListTile extends StatelessWidget {
         height: 50,
         width: 50,
         decoration: BoxDecoration(
-            image: DecorationImage(
-              image: NetworkImage(review.restologo),
-              fit: BoxFit.cover,
-            ),
-            borderRadius: BorderRadius.circular(5.0)),
+          image: DecorationImage(image:NetworkImage(review.restologo),fit:BoxFit.cover),
+          borderRadius: BorderRadius.circular(5),
+        ),
       ),
       title: StarRating(
         rating: review.star.toDouble(),

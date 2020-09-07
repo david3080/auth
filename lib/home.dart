@@ -1,11 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'account.dart';
 import 'restopage.dart';
 import 'reviewpage.dart';
-
-final userColRef = FirebaseFirestore.instance.collection("users");
 
 class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();

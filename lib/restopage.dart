@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +12,7 @@ import 'user.dart';
 const double _minSpacingPx = 16;
 const double _cardWidth = 360;
 
+// レストランをリスト表示する画面
 class RestoPage extends StatefulWidget {
   @override
   _RestoPageState createState() => _RestoPageState();
@@ -36,15 +36,14 @@ class _RestoPageState extends State<RestoPage> {
                   ),
                 ),
                 body: ResponsiveGridList(
-                  desiredItemWidth: math.min(_cardWidth,
-                      MediaQuery.of(context).size.width - (2 * _minSpacingPx)),
+                  desiredItemWidth: math.min(_cardWidth,MediaQuery.of(context).size.width-(2*_minSpacingPx)),
                   minSpacing: _minSpacingPx,
-                  children: restos.map((resto) {
+                  children: restos.map((resto) { // DBから取得するレストランマップ情報をCardに変換する
                     return Card(
                       child: InkWell(
                         onTap:()=>Navigator.of(context).push(
                           MaterialPageRoute(builder:(context)=>RestoDetail(resto:resto)),
-                        ).then((_) => setState((){})), // レストラン詳細画面から戻ったら画面リロード
+                        ).then((_) => setState((){})), // レビュー追加時の平均星数反映の可能性のためレストラン詳細画面から戻ったら画面リロード
                         splashColor: Colors.blue.withAlpha(30),
                         child: Container(
                           height: 250,
@@ -88,9 +87,6 @@ class _RestoPageState extends State<RestoPage> {
         });
   }
 }
-
-// ユーザコレクション参照
-final userColRef = FirebaseFirestore.instance.collection("users");
 
 // レストラン詳細画面
 class RestoDetail extends StatefulWidget {
@@ -144,7 +140,7 @@ class _RestoDetailState extends State<RestoDetail> {
             right: 20,
             child: InkWell(
               onTap: () {
-                userColRef.doc(authUser.uid).get().then((_snapshot) {
+                User.userColRef.doc(authUser.uid).get().then((_snapshot) {
                   User user = User.fromMap(_snapshot.id,_snapshot.data());
                   Review review = Review(
                     restoid: widget.resto.id,
@@ -157,7 +153,7 @@ class _RestoDetailState extends State<RestoDetail> {
                   Navigator.of(context).push(MaterialPageRoute(
                     builder: (context) => ReviewEdit(review:review)),
                   ).then((reload) {
-                    if(reload) setState((){}); // 画面リロード
+                    if(reload) setState((){}); // レビュー追加時は画面リロード。戻るボタンで戻った場合はリロードしない。
                   });
                 });
               },
@@ -213,11 +209,13 @@ class _RestoDetailState extends State<RestoDetail> {
                                 itemBuilder: (BuildContext context, int index) {
                                   return InkWell(
                                     onTap: () {
+                                      // ユーザ画像付レビュー詳細画面に遷移
                                       Navigator.of(context).push(MaterialPageRoute(
                                         builder: (context) => UserReviewDetail(
                                           review: reviews[index]),
                                       ));
                                     },
+                                    // レビューリスト用のユーザ画像付タイル
                                     child: UserReviewListTile(review:reviews[index],),
                                   );
                                 },
@@ -259,7 +257,7 @@ class UserReviewListTile extends StatelessWidget {
           width: 50,
           decoration: BoxDecoration(
               image: DecorationImage(
-                image: NetworkImage(review.userphotourl),
+                image: review.userphotourl!=null?NetworkImage(review.userphotourl):AssetImage("images/photo.png"),
                 fit: BoxFit.cover,
               ),
               borderRadius: BorderRadius.circular(5.0)),

@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'review.dart';
+import 'user.dart';
 
+// レストランクラス
 class Resto {
   Resto({
     @required this.id,
@@ -25,10 +27,7 @@ class Resto {
   final int reviewCount;
   final int totalStarCount;
 
-  static var restoColRef = FirebaseFirestore.instance.collection("restos");
-  static var userColRef = FirebaseFirestore.instance.collection("users");
-
-  // 食事タイプリスト
+  // 食事タイプリスト。配列typeにセットする値。
   static List<String> restoTypes = [
     '洋食',
     '和食',
@@ -38,11 +37,13 @@ class Resto {
     'とんかつ',
   ];
 
+  // デバッグ用にレストラン情報を文字列表示する
   @override
   String toString() {
     return "id:$id,name:$name,type:$type,address:$address,logo:$logo,star:$star,reviewCount:$reviewCount,totalStarCount:$totalStarCount";
   }
 
+  // マップからレストランオブジェクトを作成する
   factory Resto.fromMap(String documentId, Map<String, dynamic> data) {
     if (documentId==null||documentId==""||data==null) {
       return null;
@@ -70,6 +71,7 @@ class Resto {
     );
   }
 
+  // レストランオブジェクトからマップに変換する
   Map<String, dynamic> toMap() {
     return {
       "id": id,
@@ -83,6 +85,7 @@ class Resto {
     };
   }
 
+  // final指定されたレストランオブジェクトに値を上書きコピーして新たなレストランオブジェクトを作成する
   Resto copy(
       {String id,String name,List<String> type,String address,String logo,double star,int reviewCount,int totalStarCount,}) {
     return Resto(
@@ -97,6 +100,10 @@ class Resto {
     );
   }
 
+  // レストランのコレクション参照
+  static var restoColRef = FirebaseFirestore.instance.collection("restos");
+
+  // データベースからレストランストリームを取得する
   static Stream<List<Resto>> getRestosStream() {
     return restoColRef.snapshots().map((snapshot) {
       return snapshot.docs.map((snapshot) {
@@ -105,8 +112,10 @@ class Resto {
     });
   }
 
+  // JSON文字列から作成されるレストランマップの配列
   static List restos = jsonDecode(initRestoString);
-  // レストランコレクションがなければ初期データをセット
+
+  // データベースにレストランコレクションがなければ初期データをセットする
   static void initRestos() {
     restoColRef.get().then((snapshot) {
       if(snapshot.size == 0) {
@@ -119,7 +128,7 @@ class Resto {
               List _reviews = _resto["reviews"];
               // レストラン配下にレビューリストを追加
               _reviews.forEach((_review) {
-                userColRef.where("name",isEqualTo:_review["username"]).get().then((snapshot) async { // 登録ユーザ情報取得
+                User.userColRef.where("name",isEqualTo:_review["username"]).get().then((snapshot) async { // 登録ユーザ情報取得
                   Map<String,dynamic> _user = snapshot.docs[0].data();
                   _review["uid"] = _user["uid"];
                   _review["username"] = _user["name"];
@@ -157,6 +166,7 @@ class Resto {
   }
 }
 
+// レストランとそのレビューのJSON形式のサンプルデータ
 const String initRestoString = '''
   [
     {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'resto.dart';
 import 'review.dart';
 import 'starrating.dart';
 
@@ -18,7 +19,7 @@ class _ReviewDetailState extends State<ReviewDetail> {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
     return FutureBuilder(
-      future: Review.restoColRef.doc(widget.review.restoid).collection("reviews").doc(widget.review.id).get(),
+      future: Resto.restoColRef.doc(widget.review.restoid).collection("reviews").doc(widget.review.id).get(),
       builder: (context, snapshot) {
         if(snapshot.hasData) {
           Review review = Review.fromMap(snapshot.data.id, snapshot.data.data());
@@ -180,7 +181,7 @@ class ReviewEdit extends StatelessWidget {
   ReviewEdit({@required this.review});
   final Review review;
 
-  int star;
+  double star;
   TextEditingController cmtCtrl;
 
   @override
@@ -188,7 +189,7 @@ class ReviewEdit extends StatelessWidget {
     var screenHeight = MediaQuery.of(context).size.height;
     var screenWidth = MediaQuery.of(context).size.width;
 
-    star = review.star;
+    star = review.star.toDouble();
     cmtCtrl =  TextEditingController(text: review.comment);
 
     return Scaffold(
@@ -228,7 +229,7 @@ class ReviewEdit extends StatelessWidget {
                           size: 30.0,
                           isReadOnly: false,
                           onRated: (_star) {
-                            star = _star.toInt();
+                            star = _star;
                           },
                         ),
                       ],
@@ -295,7 +296,7 @@ class ReviewEdit extends StatelessWidget {
                     child: Icon(Icons.save_alt,size:20.0,color:Colors.white),
                     onTap: () {
                       Review.setReview(
-                        review.copy(star:star,comment:cmtCtrl.text,),
+                        review.copy(star:star.toInt(),comment:cmtCtrl.text,),
                         review.star,
                       ).then(
                         (_) => Navigator.of(context).pop<bool>(true), // レビュー詳細に戻ったら画面をリロードする
@@ -430,7 +431,7 @@ class UserReviewDetail extends StatelessWidget {
                 width: 150.0,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: NetworkImage(review.userphotourl),
+                    image: review.userphotourl!=null?NetworkImage(review.userphotourl):AssetImage("images/photo.png"),
                     fit: BoxFit.cover,
                   ),
                   borderRadius: BorderRadius.circular(15.0)

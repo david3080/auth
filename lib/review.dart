@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'resto.dart';
+
+// レビュークラス
 class Review {
   Review({
     this.id,
@@ -22,11 +25,13 @@ class Review {
   final String restoname;
   final String restologo;
 
+  // デバッグ用にレビュー情報を文字列表示する
   @override
   String toString() {
     return "id:$id,star:$star,comment:$comment,username:$username,restoname:$restoname";
   }
 
+  // マップからレビューオブジェクトを作成する
   factory Review.fromMap(String documentId, Map<String, dynamic> data) {
     if (data == null) {
       return null;
@@ -52,6 +57,7 @@ class Review {
     );
   }
 
+  // レビューオブジェクトからマップに変換する
   Map<String, dynamic> toMap() {
     return {
       "id": id,
@@ -66,6 +72,7 @@ class Review {
     };
   }
 
+  // final指定されたレビューオブジェクトに値を上書きコピーして新たなレビューオブジェクトを作成する
   Review copy({
     String id,
     int star,
@@ -90,16 +97,15 @@ class Review {
     );
   }
 
-  static var restoColRef = FirebaseFirestore.instance.collection("restos");
-  static var reviewColGrpRef =
-    FirebaseFirestore.instance.collectionGroup("reviews"); // コレクショングループ
+  // レビューのコレクショングループ参照
+  static var reviewColGrpRef = FirebaseFirestore.instance.collectionGroup("reviews");
 
   // 星数リスト（0から5まで）
   static List<int> starSelectList = [0, 1, 2, 3, 4, 5];
 
   // レストランを特定してそのレビューをリストします
   static Stream<List<Review>> getRestoReviwsStream(String restoId) {
-    return restoColRef
+    return Resto.restoColRef
         .doc(restoId)
         .collection("reviews")
         .snapshots()
@@ -139,7 +145,7 @@ class Review {
   // レビュー情報を追加・更新する(oldStarはレビュー追加の場合0,更新の場合更新前のstarの値をセットする)
   static Future<void> setReview(Review review, int oldStar) async {
     // レストランのドキュメントリファレンスを取得
-    DocumentReference _restoDocRef = restoColRef.doc(review.restoid);
+    DocumentReference _restoDocRef = Resto.restoColRef.doc(review.restoid);
     if (review.id == null) { // 追加の場合
       // 新規レビューなのでIDを取得してから書き込み
       await _restoDocRef.collection("reviews").doc().set(review.copy(id:_restoDocRef.collection("reviews").doc().id).toMap());
@@ -177,7 +183,7 @@ class Review {
   // レビュー情報を削除する
   static Future<void> deleteReview(Review review) async {
     // レストランドキュメントを指定して、その配下の指定したレビューの削除
-    DocumentReference _restoDocRef = restoColRef.doc(review.restoid);
+    DocumentReference _restoDocRef = Resto.restoColRef.doc(review.restoid);
     await _restoDocRef.collection("reviews").doc(review.id).delete();
 
     // レストランの星数を更新
