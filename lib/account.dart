@@ -35,7 +35,7 @@ class _AccountPageState extends State<AccountPage> {
                 nameController.text = user.name;
                 return Column(
                   children: <Widget> [
-                    Avatar(url: user?.url,onPressed:()=>_chooseAvatar(context, user)),
+                    Avatar(url: user?.url,name:user?.email,onPressed:()=>_chooseAvatar(context, user)),
                     SizedBox(height: 10),
                     Container(
                       padding: EdgeInsets.all(20),
@@ -105,12 +105,14 @@ class _AccountPageState extends State<AccountPage> {
 class Avatar extends StatelessWidget {
   const Avatar({
     @required this.url,
+    @required this.name,
     this.radius = 70,
     this.borderColor = Colors.black54,
     this.borderWidth = 2,
     this.onPressed,
   });
   final String url;
+  final String name;
   final double radius;
   final Color borderColor;
   final double borderWidth;
@@ -126,7 +128,7 @@ class Avatar extends StatelessWidget {
           radius: radius,
           backgroundColor: Colors.black12,
           backgroundImage: url != null ? NetworkImage(url) : AssetImage("images/photo.png"),
-          child: url == null ? Icon(Icons.camera_alt, size: radius) : null,
+          child: url == null ? Text(name.substring(0,2)) : null,
         ),
       ),
     );
