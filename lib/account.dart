@@ -128,7 +128,7 @@ class Avatar extends StatelessWidget {
           radius: radius,
           backgroundColor: Colors.black12,
           backgroundImage: url != null ? NetworkImage(url) : AssetImage("images/photo.png"),
-          child: url == null ? Text(name.substring(0,2)) : null,
+          child:url==null?Text(name.substring(0,2).toUpperCase(),style:TextStyle(fontSize:50,color:Colors.black)):null,
         ),
       ),
     );
